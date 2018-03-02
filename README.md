@@ -14,8 +14,8 @@ Required library:
   
   
   - Windows: 
-    - Install Python 3.5: http://www.python.org/downloads/ (avoid the 64-bit versions)
-    - Install Numpy (optional): http://sourceforge.net/projects/numpy/files/NumPy/ (the version that specifies python3.5)
+    - Install Python 2.7: http://www.python.org/downloads/ (avoid the 64-bit versions)
+    - Install Numpy (optional): http://sourceforge.net/projects/numpy/files/NumPy/ (the version that specifies python2.7)
     - Install NLTK: http://pypi.python.org/pypi/nltk
     - Test installation: Start>Python35, then type import nltk
   
