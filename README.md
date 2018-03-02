@@ -23,4 +23,9 @@ Required library:
    - If you have pip: pip install pattern
    - More ways to install: https://www.clips.uantwerpen.be/pages/pattern
    
+3. Requests:
+  - If you have pip: pip install requests[security]
+  - More ways to install: http://docs.python-requests.org/en/master/user/install/
+  - If you're on OS X and running into 'Connection reset by peer issues', make sure you also have pyOpenSSL installed
+   
 
