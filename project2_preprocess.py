@@ -21,8 +21,13 @@ class Scraper:
     def __init__(self,qpage, mod):
         self.ingredients = []
         self.directions = []
-        self.page = requests.get(qpage).text
-        self.soup = BeautifulSoup(self.page,mod)
+        if 'http' in qpage:
+            #if input page is a web page
+            self.page = requests.get(qpage).text
+            self.soup = BeautifulSoup(self.page,mod)
+        else:
+            #if input is a file
+            self.page = qpage
 
 
     # Scrape all ingredients
@@ -58,14 +63,38 @@ class Scraper:
 
     # Scrape primary cooking methods
     def scrape_primarycookingmethods(self):
-        cookingmethods = ['stir']
+        pcookingmethods = []
 
         fullHTML = self.soup.find_all('picture',{"class": 'img-responsive'})
         for x in range(0, len(fullHTML)):
-            cookingmethods.append(fullHTML[x]['title'].encode('utf-8').lower())
+            pcookingmethods.append(fullHTML[x]['title'].encode('utf-8').lower())
+
+        return pcookingmethods
+
+    # Scrape general cooking methods
+    def scrape_cookingmethods(self):
+        cookingmethods = ['shake','crush','squeeze','cut']
+
+        fullHTML = self.soup.find_all('td',{'valign':'TOP'})
+        fullHTML = [u.find_all('b') for u in fullHTML if u.find_all('b')]
+        fullHTML = [item for sublist in fullHTML for item in sublist]
+
+        for x in range(0, len(fullHTML)):
+            cookingmethods.append(fullHTML[x].text.strip().split(':')[0].encode('utf-8').lower())
 
         return cookingmethods
 
+    # Scrape tools
+    def scrape_tools(self):
+        tools = []
+        with open(self.page) as fp:
+            line = fp.readline()
+            while line:
+                tools.append(singularize(line.strip().lower()))
+                line = fp.readline()
+        return tools
+
+    # Scrape meats
     def scrape_meats(self):
         meats = []
         article = self.soup.find_all('article', {"class": "tag-animal-protein-list"})
@@ -147,14 +176,23 @@ class Ingredients:
 
 
 class Directions:
-    def __init__(self,oneDir,cooking_methods):
+    def __init__(self,oneDir,cooking_methods,othercookingmethods,tools):
 
         # tokenization and remove stop words
         tokens = TweetTokenizer().tokenize(oneDir)
         stop = stopwords.words('english') + list(string.punctuation)
         tokens = [word.encode('utf-8') for word in tokens if not word in stop and len(word) > 2]
+        token_tag = nltk.pos_tag(tokens)
+
+
 
         # check if any primary cooking methods in this direction
         self.primaryMethods = [pattern.en.lemma(word) for word in tokens if pattern.en.lemma(word) in cooking_methods]
+        self.otherMethods = [pattern.en.lemma(word) for word in tokens
+                             if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word) in cooking_methods ]
+
+
+        # check if any tool is used in this direction
+        self.tools = [t for t in tools if oneDir.find(t) > 0]
 
 
