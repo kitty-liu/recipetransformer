@@ -9,30 +9,25 @@ import project2_preprocess as prep
 import time
 
 
-veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine", "honey": "agave syrup","cheese": "nutritional yeast"}
 
 # right now replacing with tofu but will add other types
-def toVegetarian(ingredientList):
-    # Initial meat list, scraping from one website right now but does not include enough meats
-    meatList = prep.Meats().scrape_meats()
-    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+def toVegetarian(ingredientList, meatList):
     vegList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
                 ingredient.name = "tofu"
+                ingredient.descriptor = "none"
         vegList.append(ingredient)
     return vegList
 
-def toVegan(ingredientList):
-    # Initial meat list, scraping from one website right now but does not include enough meats
-    meatList = prep.Meats().scrape_meats()
-    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+def toVegan(ingredientList, meatList, veganSubs):
     veganList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
                 ingredient.name = "tofu"
+                ingredient.descriptor = "none"
         for nonVeg in veganSubs.keys():
             if nonVeg in ingredient.name:
                 ingredient.name = veganSubs[nonVeg]
@@ -59,6 +54,13 @@ def main():
     primarycookingmethods = primarycookingmethods_sp.scrape_primarycookingmethods()
     print 'Primary cooking methods: ',primarycookingmethods
 
+    meat_page = "http://naturalhealthtechniques.com/list-of-meats-and-poultry/"
+    meatlist_sp = prep.Scraper(meat_page, mod)
+    meatList = meatlist_sp.scrape_meats()
+    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+
+    veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
+                 "honey": "agave syrup", "cheese": "nutritional yeast"}
 
     #test pages:
     #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
@@ -91,9 +93,9 @@ def main():
 
     # Transform Ingredient List based on input
     if transformation == "vegetarian":
-        toVegetarian(prepIngredients)
+        toVegetarian(prepIngredients, meatList)
     elif transformation == "vegan":
-        toVegan(prepIngredients)
+        toVegan(prepIngredients, meatList, veganSubs)
 
 
     # Prepped ingredients

@@ -66,14 +66,6 @@ class Scraper:
 
         return cookingmethods
 
-
-
-class Meats:
-    def __init__(self):
-        self.meats = []
-        self.page = requests.get("http://naturalhealthtechniques.com/list-of-meats-and-poultry/").text
-        self.soup = BeautifulSoup(self.page, 'html.parser')
-
     def scrape_meats(self):
         meats = []
         article = self.soup.find_all('article', {"class": "tag-animal-protein-list"})
@@ -84,6 +76,7 @@ class Meats:
             meats.append(fullHTML[x].text.strip().encode('utf-8').lower())
         self.meats = meats
         return meats
+
 
 class Ingredients:
     def __init__(self,oneIngred,units):
