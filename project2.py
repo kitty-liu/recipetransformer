@@ -37,6 +37,7 @@ def toVegan(ingredientList, meatList, veganSubs):
 def toItalian():
     print "italian"
 
+
 #Main function
 def main():
     start_time = time.time()
@@ -52,8 +53,21 @@ def main():
     primarycookingmethods_page = 'https://www.thedailymeal.com/cook/15-basic-cooking-methods-you-need-know-slideshow/slide-12'
     primarycookingmethods_sp = prep.Scraper(primarycookingmethods_page,mod)
     primarycookingmethods = primarycookingmethods_sp.scrape_primarycookingmethods()
-    print 'Primary cooking methods: ',primarycookingmethods
 
+
+    #scrape other cooking methods:
+    othercookingmethods_page = 'https://www.d.umn.edu/~alphanu/cookery/glossary_cooking.html'
+    othercookingmethods_page_sp = prep.Scraper(othercookingmethods_page,mod)
+    othercookingmethods = othercookingmethods_page_sp.scrape_cookingmethods()
+
+
+    #scrape tools.txt
+    tools_page = 'tools.txt'
+    tools_sp = prep.Scraper(tools_page, '')
+    tools = tools_sp.scrape_tools()
+
+
+    #scrape meat
     meat_page = "http://naturalhealthtechniques.com/list-of-meats-and-poultry/"
     meatlist_sp = prep.Scraper(meat_page, mod)
     meatList = meatlist_sp.scrape_meats()
@@ -68,10 +82,10 @@ def main():
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
-    #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
 
     #test quatity&measurement conversion:
-    qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
+    #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -90,7 +104,6 @@ def main():
     for igd in ingredients:
         prepIngredients.append(prep.Ingredients(igd, units))
 
-
     # Transform Ingredient List based on input
     if transformation == "vegetarian":
         toVegetarian(prepIngredients, meatList)
@@ -107,19 +120,36 @@ def main():
         print 'descriptor: ' + ingredient.descriptor
         print 'preparation: ' + ingredient.preparation
 
+
     # Parse directions
     primary_cookingmethods = []
+    other_cookingmethods = []
+    used_tools = []
+
     for dir in directions:
-        direction = prep.Directions(dir,primarycookingmethods)
+        direction = prep.Directions(dir,primarycookingmethods,othercookingmethods,tools)
         if direction.primaryMethods:
             primary_cookingmethods.append(direction.primaryMethods)
+        if direction.tools:
+            used_tools.append(direction.tools)
+        if direction.otherMethods:
+            other_cookingmethods.append(direction.otherMethods)
 
     #flatten a list
     primary_cookingmethods = [item for sublist in primary_cookingmethods for item in sublist]
     print '\nPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
 
+    other_cookingmethods = [item for sublist in other_cookingmethods for item in sublist]
+    print '\nOther cooking methods:', ', '.join(set(other_cookingmethods))
+
+    used_tools = [item for sublist in used_tools for item in sublist]
+    print '\nTools:', ', '.join(set(used_tools))
+
+
+
     end_time = time.time()
     print(end_time - start_time)
+
 
 
 if __name__ == "__main__":
