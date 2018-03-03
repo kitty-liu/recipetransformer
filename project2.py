@@ -8,6 +8,27 @@
 import project2_preprocess as prep
 import time
 
+
+# Initial meat list, scraping from one website right now but does not include enough meats
+meatList = prep.Meats().scrape_meats()
+meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+
+# right now replacing with tofu but will add other types
+def toVegetarian(ingredientList):
+    vegList = []
+    for ingredient in ingredientList:
+        for meat in meatList:
+            if meat in ingredient.name:
+                ingredient.name = "tofu"
+        vegList.append(ingredient)
+    return vegList
+
+def toVegan():
+    print "vegan"
+
+def toItalian():
+    print "italian"
+
 #Main function
 def main():
     start_time = time.time()
@@ -46,15 +67,24 @@ def main():
     print 'All directions:'
     print directions
 
+
+    prepIngredients = []
+
     # Parse ingredients
     for igd in ingredients:
-        ingredient = prep.Ingredients(igd, units)
+        prepIngredients.append(prep.Ingredients(igd, units))
+
+    # Convert to Vegetarian
+    toVegetarian(prepIngredients)
+
+    # Prepped ingredients
+    for ingredient in prepIngredients:
         print '\n'
         print 'name: ' + ingredient.name
         print 'quantity: ' + str(ingredient.quantity)
         print 'measurement: ' + ingredient.measurement
         print 'descriptor: ' + ingredient.descriptor
-        print 'preparation: '+ ingredient.preparation
+        print 'preparation: ' + ingredient.preparation
 
     # Parse directions
     primary_cookingmethods = []
@@ -69,7 +99,6 @@ def main():
 
     end_time = time.time()
     print(end_time - start_time)
-
 
 
 if __name__ == "__main__":

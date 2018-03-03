@@ -68,6 +68,23 @@ class Scraper:
 
 
 
+class Meats:
+    def __init__(self):
+        self.meats = []
+        self.page = requests.get("http://naturalhealthtechniques.com/list-of-meats-and-poultry/").text
+        self.soup = BeautifulSoup(self.page, 'html.parser')
+
+    def scrape_meats(self):
+        meats = []
+        article = self.soup.find_all('article', {"class": "tag-animal-protein-list"})
+        fullHTML = []
+        for art in article:
+            fullHTML = art.find_all("li")
+        for x in range(0, len(fullHTML)):
+            meats.append(fullHTML[x].text.strip().encode('utf-8').lower())
+        self.meats = meats
+        return meats
+
 class Ingredients:
     def __init__(self,oneIngred,units):
         #special adj that shouldn't appear with a name
