@@ -9,12 +9,13 @@ import project2_preprocess as prep
 import time
 
 
-# Initial meat list, scraping from one website right now but does not include enough meats
-meatList = prep.Meats().scrape_meats()
-meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine", "honey": "agave syrup","cheese": "nutritional yeast"}
 
 # right now replacing with tofu but will add other types
 def toVegetarian(ingredientList):
+    # Initial meat list, scraping from one website right now but does not include enough meats
+    meatList = prep.Meats().scrape_meats()
+    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
     vegList = []
     for ingredient in ingredientList:
         for meat in meatList:
@@ -23,8 +24,20 @@ def toVegetarian(ingredientList):
         vegList.append(ingredient)
     return vegList
 
-def toVegan():
-    print "vegan"
+def toVegan(ingredientList):
+    # Initial meat list, scraping from one website right now but does not include enough meats
+    meatList = prep.Meats().scrape_meats()
+    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+    veganList = []
+    for ingredient in ingredientList:
+        for meat in meatList:
+            if meat in ingredient.name:
+                ingredient.name = "tofu"
+        for nonVeg in veganSubs.keys():
+            if nonVeg in ingredient.name:
+                ingredient.name = veganSubs[nonVeg]
+        veganList.append(ingredient)
+    return veganList
 
 def toItalian():
     print "italian"
@@ -75,7 +88,10 @@ def main():
         prepIngredients.append(prep.Ingredients(igd, units))
 
     # Convert to Vegetarian
-    toVegetarian(prepIngredients)
+    # toVegetarian(prepIngredients)
+
+    # Convert to Vegan
+    toVegan(prepIngredients)
 
     # Prepped ingredients
     for ingredient in prepIngredients:
