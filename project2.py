@@ -45,6 +45,7 @@ def toItalian():
 #Main function
 def main():
     start_time = time.time()
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe? Your options are vegetarian, vegan, healthy, easy: "))
     mod = 'html.parser'
 
     #scrape units
@@ -87,11 +88,13 @@ def main():
     for igd in ingredients:
         prepIngredients.append(prep.Ingredients(igd, units))
 
-    # Convert to Vegetarian
-    # toVegetarian(prepIngredients)
 
-    # Convert to Vegan
-    toVegan(prepIngredients)
+    # Transform Ingredient List based on input
+    if transformation == "vegetarian":
+        toVegetarian(prepIngredients)
+    elif transformation == "vegan":
+        toVegan(prepIngredients)
+
 
     # Prepped ingredients
     for ingredient in prepIngredients:
