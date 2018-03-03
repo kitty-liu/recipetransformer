@@ -14,13 +14,18 @@ Required library:
   
   
   - Windows: 
-    - Install Python 3.5: http://www.python.org/downloads/ (avoid the 64-bit versions)
-    - Install Numpy (optional): http://sourceforge.net/projects/numpy/files/NumPy/ (the version that specifies python3.5)
+    - Install Python 2.7: http://www.python.org/downloads/ (avoid the 64-bit versions)
+    - Install Numpy (optional): http://sourceforge.net/projects/numpy/files/NumPy/ (the version that specifies python2.7)
     - Install NLTK: http://pypi.python.org/pypi/nltk
     - Test installation: Start>Python35, then type import nltk
   
 2. Pattern:
    - If you have pip: pip install pattern
    - More ways to install: https://www.clips.uantwerpen.be/pages/pattern
+   
+3. Requests:
+  - If you have pip: pip install requests[security]
+  - More ways to install: http://docs.python-requests.org/en/master/user/install/
+  - If you're on OS X and running into 'Connection reset by peer issues', make sure you also have pyOpenSSL installed
    
 
