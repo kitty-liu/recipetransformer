@@ -34,6 +34,35 @@ def toVegan(ingredientList, meatList, veganSubs):
         veganList.append(ingredient)
     return veganList
 
+def toEasy(ingredientList, commonSpices):
+    count = 0
+    indexes = []
+    for ingredient in ingredientList:
+        common = False
+        for spice in commonSpices:
+            if spice in ingredient.name:
+                common = True
+        if not common and (ingredient.measurement == "teaspoon" or ingredient.measurement == "tablespoon"):
+            indexes.append(count)
+        count += 1
+    adj = 0
+    print indexes
+    for index in indexes:
+        ingredientList.pop(index + adj)
+        adj -= 1
+    return ingredientList
+
+def toAltMethod(ingredientList, meatList, altMethods, pm, altList):
+    for ingredient in ingredientList:
+        for meat in meatList:
+            if meat in ingredient.name:
+                for alt in altMethods:
+                    res = alt.getAlts("meat",pm)
+                    if res != -1:
+                        altList = res
+                        break
+    return altList
+
 def toItalian():
     print "italian"
 
@@ -41,7 +70,7 @@ def toItalian():
 #Main function
 def main():
     start_time = time.time()
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe? Your options are vegetarian, vegan, healthy, easy: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy: "))
     mod = 'html.parser'
 
     #scrape units
@@ -76,6 +105,20 @@ def main():
     veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
                  "honey": "agave syrup", "cheese": "nutritional yeast"}
 
+    #Easy change
+    commonSpices = ["salt", "pepper", "garlic"]
+
+    #Alt Methods
+    altList = []
+    pf = "pan fry"
+    bake = "bake"
+    mw = "microwave"
+    df = "deepfry"
+    altMethods = []
+    altMethods.append(prep.AltCook("meat",bake,[pf, mw]))
+    altMethods.append(prep.AltCook("meat", pf, [df, bake, mw]))
+    altMethods.append(prep.AltCook("meat", mw, [pf, bake]))
+    altMethods.append(prep.AltCook("meat", df, [pf, bake]))
     #test pages:
     #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
@@ -104,12 +147,31 @@ def main():
     for igd in ingredients:
         prepIngredients.append(prep.Ingredients(igd, units))
 
+    # Parse directions
+    primary_cookingmethods = []
+    other_cookingmethods = []
+    used_tools = []
+
+    for dir in directions:
+        direction = prep.Directions(dir, primarycookingmethods, othercookingmethods, tools)
+        if direction.primaryMethods:
+            primary_cookingmethods.append(direction.primaryMethods)
+        if direction.tools:
+            used_tools.append(direction.tools)
+        if direction.otherMethods:
+            other_cookingmethods.append(direction.otherMethods)
+
     # Transform Ingredient List based on input
+    primary_cookingmethods = [item for sublist in primary_cookingmethods for item in sublist]
+    pm = ''.join(set(primary_cookingmethods))
     if transformation == "vegetarian":
         toVegetarian(prepIngredients, meatList)
     elif transformation == "vegan":
         toVegan(prepIngredients, meatList, veganSubs)
-
+    elif transformation == "easy":
+        ingredientList = toEasy(prepIngredients, commonSpices)
+    elif transformation == "altmethod":
+        altList = toAltMethod(prepIngredients, meatList, altMethods, pm, altList)
 
     # Prepped ingredients
     for ingredient in prepIngredients:
@@ -121,23 +183,12 @@ def main():
         print 'preparation: ' + ingredient.preparation
 
 
-    # Parse directions
-    primary_cookingmethods = []
-    other_cookingmethods = []
-    used_tools = []
-
-    for dir in directions:
-        direction = prep.Directions(dir,primarycookingmethods,othercookingmethods,tools)
-        if direction.primaryMethods:
-            primary_cookingmethods.append(direction.primaryMethods)
-        if direction.tools:
-            used_tools.append(direction.tools)
-        if direction.otherMethods:
-            other_cookingmethods.append(direction.otherMethods)
 
     #flatten a list
-    primary_cookingmethods = [item for sublist in primary_cookingmethods for item in sublist]
     print '\nPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
+
+    if len(altList) != 0:
+        print '\nAlternative cooking methods:', ', '.join(set(altList))
 
     other_cookingmethods = [item for sublist in other_cookingmethods for item in sublist]
     print '\nOther cooking methods:', ', '.join(set(other_cookingmethods))
