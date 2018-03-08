@@ -195,4 +195,15 @@ class Directions:
         # check if any tool is used in this direction
         self.tools = [t for t in tools if oneDir.find(t) > 0]
 
+class AltCook:
+    def __init__(self,type,pm,alts):
+        self.type = type
+        self.pm = pm
+        self.alts = alts
 
+
+    def getAlts(self, type, pm):
+        if(type == self.type and pm == self.pm):
+            return self.alts
+        else:
+            return -1
