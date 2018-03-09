@@ -106,6 +106,22 @@ class Scraper:
         self.meats = meats
         return meats
 
+    # Helper function for healthy scrape
+    def not_strong(tag):
+        return tag.soup.td #and not tag.soup.has_attr("strong")
+#        return (tagged_td and not tag.soup.has_attr('strong'))
+
+    # Scrape healthy substitutions
+    def scrape_healthy(self):
+        unhealthyIngs = []
+        article = self.soup.find_all("td")
+        # need to get rid of any items that include "<strong>"
+        # also sort it into a dictionary for corresponding replacements
+        fullHTML = []
+        print "healthy scrape gives"
+        print(article)
+        #for art in article:
+         #   fullHTML = art.
 
 class Ingredients:
     def __init__(self,oneIngred,units):

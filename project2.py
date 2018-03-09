@@ -34,6 +34,11 @@ def toVegan(ingredientList, meatList, veganSubs):
         veganList.append(ingredient)
     return veganList
 
+def toHealthy(ingrediantList, unhealthyList):
+    healthyList = []
+    #for ingredient in ingrediantList:
+
+
 def toEasy(ingredientList, commonSpices):
     count = 0
     indexes = []
@@ -104,6 +109,12 @@ def main():
 
     veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
                  "honey": "agave syrup", "cheese": "nutritional yeast"}
+
+    #scrape unhealthy ingredients
+    unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
+    unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
+    unhealthyList = unhealthyList_sp.scrape_healthy()
+
 
     #Easy change
     commonSpices = ["salt", "pepper", "garlic"]
