@@ -85,7 +85,7 @@ def main():
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
-        print 'Your option(' + transformation + ') is not available. Analyzing original recipe...\n'
+        print ' Your option(' + transformation + ') is not available. Analyzing original recipe...\n'
 
     mod = 'html.parser'
 
@@ -149,6 +149,8 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
 
     qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
+    #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -212,7 +214,6 @@ def main():
 
     steps = []
     for i in range(len(directions)):
-
         igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
         if len(igd_for_dir) < 1:
             igd_for_dir = ['none']
