@@ -110,7 +110,7 @@ class Scraper:
 class Ingredients:
     def __init__(self,oneIngred,units):
         #special adj that shouldn't appear with a name
-        spe_jj = ['prepared']
+        spe_jj = ['prepared','bone-in','fresh']
 
 
         #extract parentheses and elements in it
@@ -149,16 +149,6 @@ class Ingredients:
         #update ingredient string by removing quantity and measurement
         oneIngred = oneIngred.replace(quantity_str,'') if not quantity_str is ' ' else oneIngred
 
-        # determine name
-        name = ''
-        sent = pattern.en.parsetree(oneIngred.split(',')[0])
-        for sentence in sent:
-            for chunk in sentence.chunks:
-                if chunk.type == 'NP':
-                    namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD' and not w.string in spe_jj ]
-                    name = name + ' '.join(namelist) + ' '
-        self.name = name.rstrip()
-
         # tokenization
         tokens = TweetTokenizer().tokenize(oneIngred)
         token_tag = nltk.pos_tag(tokens)
@@ -174,9 +164,25 @@ class Ingredients:
                  if (pos == 'VBD' or pos == 'VBN' or pos == 'RB')]
         self.preparation = ' '.join(map(str, prep)) if prep else 'none'
 
+        # determine name
+        name = ''
+        sent = pattern.en.parsetree(oneIngred.split(',')[0])
+        for sentence in sent:
+            for chunk in sentence.chunks:
+                if chunk.type == 'NP':
+                    namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD'
+                                and not w.string in spe_jj and not w.string in self.preparation ]
+                    name = name + ' '.join(namelist) + ' '
+        self.name = name.rstrip()
+
+        if self.name is '':
+            names = [word for word, pos in token_tag \
+                    if (pos.startswith('NN'))]
+            self.name = ' '.join(map(str, names)) if names else 'none'
+
 
 class Directions:
-    def __init__(self,oneDir,cooking_methods,othercookingmethods,tools):
+    def __init__(self,oneDir,cooking_methods,othercookingmethods,tools,):
 
         # tokenization and remove stop words
         tokens = TweetTokenizer().tokenize(oneDir)
@@ -187,14 +193,24 @@ class Directions:
 
 
         # check if any primary cooking methods in this direction
-        self.primaryMethods = [pattern.en.lemma(word) for word in tokens if pattern.en.lemma(word) in cooking_methods]
-        self.otherMethods = [pattern.en.lemma(word) for word in tokens
-                             if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word) in cooking_methods ]
+        self.primaryMethods = [pattern.en.lemma(word) for word in tokens if pattern.en.lemma(word).encode('utf-8') in cooking_methods]
+        if len(self.primaryMethods) < 1:
+            self.primaryMethods = ['none']
 
+        self.otherMethods = [pattern.en.lemma(word) for word in tokens
+                             if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word).encode('utf-8') in cooking_methods ]
+        if len(self.otherMethods) < 1:
+            self.otherMethods = ['none']
 
         # check if any tool is used in this direction
         self.tools = [t for t in tools if oneDir.find(t) > 0]
+        if len(self.tools) < 1:
+            self.tools = ['none']
 
+        cookingtime = re.findall(r'[\d*\/\d+|\d+|\d.]*[ to ]*[\d*\/\d+|\d+|\d.]+\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',oneDir)
+        self.cookingtime = cookingtime if cookingtime else ['none']
+
+       
 class AltCook:
     def __init__(self,type,pm,alts):
         self.type = type
