@@ -110,8 +110,7 @@ class Scraper:
 class Ingredients:
     def __init__(self,oneIngred,units):
         #special adj that shouldn't appear with a name
-        spe_jj = ['prepared','bone-in','fresh']
-
+        spe_jj = ['prepared','fresh','plain','large','thick']
 
         #extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
@@ -124,7 +123,7 @@ class Ingredients:
         # determine quantity
         # find the first number in a string, and convert str to float
         quantity_str = re.search('[\d*\/\d+|\d+| ]+|$', oneIngred).group()
-        self.quantity = float(sum(Fraction(d) for d in quantity_str.split())) \
+        self.quantity = float("{0:.2f}".format(float(sum(Fraction(d) for d in quantity_str.split())))) \
             if quantity_str and not quantity_str is ' ' else 'none'
 
         # determine measurement, and update quantity if necessary
@@ -151,13 +150,26 @@ class Ingredients:
 
         # tokenization
         tokens = TweetTokenizer().tokenize(oneIngred)
-        token_tag = nltk.pos_tag(tokens)
+        token_tag_org = nltk.pos_tag(tokens)
+        token_tag = []
+
+        #Correct common mistakes of pos tagger
+        for tt in token_tag_org:
+            templist = list(tt)
+            if templist[0] == 'chopped':
+                templist[1] = 'VBD'
+            elif templist[0] == 'plain' or 'less' in templist[0] or 'ground' in templist[0] or ('-' in templist[0] and len(templist[0]) > 1):
+                templist[1] = 'JJ'
+            token_tag.append(tuple(templist))
+
+
 
         #determine descriptor
         # tag lookup: https://pythonprogramming.net/natural-language-toolkit-nltk-part-speech-tagging/
         desp = [word for word, pos in token_tag \
                  if (pos == 'JJ')]
-        self.descriptor = ' '.join(map(str, desp)) if desp else 'none'
+        self.descriptor = ', '.join(map(str, desp)) if desp else 'none'
+
 
         # determine preparation
         prep = [word for word, pos in token_tag \
@@ -171,13 +183,13 @@ class Ingredients:
             for chunk in sentence.chunks:
                 if chunk.type == 'NP':
                     namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD'
-                                and not w.string in spe_jj and not w.string in self.preparation ]
+                                and not w.string in spe_jj and not w.string in self.preparation and not '-' in w.string ]
                     name = name + ' '.join(namelist) + ' '
-        self.name = name.rstrip()
+        self.name = name.strip()
 
         if self.name is '':
-            names = [word for word, pos in token_tag \
-                    if (pos.startswith('NN'))]
+            names = [word for word, pos in token_tag\
+                    if (pos.startswith('NN')) and not word.encode('utf-8') in units]
             self.name = ' '.join(map(str, names)) if names else 'none'
 
 
@@ -207,10 +219,11 @@ class Directions:
         if len(self.tools) < 1:
             self.tools = ['none']
 
-        cookingtime = re.findall(r'[\d*\/\d+|\d+|\d.]*[ to ]*[\d*\/\d+|\d+|\d.]+\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',oneDir)
+        cookingtime = re.findall(r'[\d*\/\d+|\d+|\d.]*\b[ to ]*\b[\d*\/\d+|\d+|\d.]+\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',oneDir)
         self.cookingtime = cookingtime if cookingtime else ['none']
+        self.cookingtime = [c.strip() for c in self.cookingtime]
 
-       
+ 
 class AltCook:
     def __init__(self,type,pm,alts):
         self.type = type
