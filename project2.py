@@ -10,31 +10,38 @@ import time
 from pattern.text.en import pluralize
 
 
-
+#Update directions when any ingredient changes. Replace original ingredient to new ingredient
+def updateDirections(directions,org_ingredient,new_ingredient):
+    return [dir.replace(org_ingredient,new_ingredient) for dir in directions]
 
 # right now replacing with tofu but will add other types
-def toVegetarian(ingredientList, meatList):
+def toVegetarian(ingredientList, meatList,directions):
     vegList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,'tofu')
                 ingredient.name = "tofu"
                 ingredient.descriptor = "none"
+                ingredient.measurement = "ounce"
         vegList.append(ingredient)
-    return vegList
+    return vegList,directions
 
-def toVegan(ingredientList, meatList, veganSubs):
+def toVegan(ingredientList, meatList, veganSubs,directions):
     veganList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,'tofu')
                 ingredient.name = "tofu"
                 ingredient.descriptor = "none"
+                ingredient.measurement = "ounce"
         for nonVeg in veganSubs.keys():
             if nonVeg in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,veganSubs[nonVeg])
                 ingredient.name = veganSubs[nonVeg]
         veganList.append(ingredient)
-    return veganList
+    return veganList,directions
 
 def toEasy(ingredientList, commonSpices):
     count = 0
@@ -73,6 +80,13 @@ def toItalian():
 def main():
     start_time = time.time()
     transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy: "))
+
+    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy']
+    if transformation in options:
+        print 'Transforming to ' + transformation + '...\n'
+    else:
+        print 'Your option(' + transformation + ') is not available. Analyzing original recipe...\n'
+
     mod = 'html.parser'
 
     #scrape units
@@ -158,6 +172,7 @@ def main():
     other_cookingmethods = []
     used_tools = []
     steps_time = []
+    #steps_test = []
 
     for dir in directions:
         direction = prep.Directions(dir, primarycookingmethods, othercookingmethods, tools,)
@@ -169,15 +184,16 @@ def main():
             other_cookingmethods.append(direction.otherMethods)
         if direction.cookingtime:
             steps_time.append(direction.cookingtime)
-
+        #if direction.step:
+            #steps_test.append(direction.step)
 
     # Transform Ingredient List based on input
     primary_cookingmethods = [item for sublist in primary_cookingmethods_list for item in sublist if not item is 'none']
     pm = ''.join(set(primary_cookingmethods))
     if transformation == "vegetarian":
-        prepIngredients = toVegetarian(prepIngredients, meatList)
+        prepIngredients,directions = toVegetarian(prepIngredients, meatList,directions)
     elif transformation == "vegan":
-        prepIngredients = toVegan(prepIngredients, meatList, veganSubs)
+        prepIngredients,directions = toVegan(prepIngredients, meatList, veganSubs,directions)
     elif transformation == "easy":
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "altmethod":
@@ -197,14 +213,13 @@ def main():
     steps = []
     for i in range(len(directions)):
 
-        igd_for_dir = [ing.name for ing in prepIngredients if ing.name in directions[i]]
+        igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
         if len(igd_for_dir) < 1:
             igd_for_dir = ['none']
         steps.append('Step ' + str(i+1) + ': | ' + 'Ingredients: ' + ', '.join(igd_for_dir) + ' | ' + 'Tool: ' +
                      ', '.join(used_tools[i]) + ' | ' + 'Primary Cooking Methods: ' + ', '.join(primary_cookingmethods_list[i])
                      + ' | ' + 'Other Cooking Methods: ' + ', '.join(other_cookingmethods[i]) + ' | ' + 'Time: ' +
                      ', '.join(steps_time[i]))
-
 
 
 
@@ -224,6 +239,7 @@ def main():
     for s in steps:
         print '\n'.join(s.split(' | '))
         print '\n'
+
 
 
 
