@@ -113,7 +113,7 @@ def main():
     #scrape unhealthy ingredients
     unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
     unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
-    unhealthyList = unhealthyList_sp.scrape_healthy()
+    unhealthyDict = unhealthyList_sp.scrape_healthy()
 
 
     #Easy change
