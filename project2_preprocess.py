@@ -106,6 +106,7 @@ class Scraper:
         self.meats = meats
         return meats
 
+
     # Helper function for healthy scrape
     def not_strong(tag):
         return tag.soup.td #and not tag.soup.has_attr("strong")
@@ -129,11 +130,60 @@ class Scraper:
 
         return ingDict
 
+    # Scrape vegetables
+    def scrape_vegtables(self):
+        vegetables = []
+        article = self.soup.find_all('div', {"class": "mw-parser-output"})
+        fullHTML = []
+        for art in article:
+            fullHTML = art.find_all("li")
+        for x in range(0, len(fullHTML)):
+            txt = fullHTML[x].text.strip().encode('utf-8').lower()
+            if "legumes" not in txt and \
+            "beans" not in txt and \
+            "bean" not in txt and\
+            "peppers" not in txt and\
+            "herbs and spices" not in txt:
+                finalsplitstr = txt.replace('\\','(').replace(':', '(').replace('[','(').split("(")
+                if "\n" not in finalsplitstr[0]:
+                    vegetables.append(finalsplitstr[0])
+        vegetables.pop()
+        vegetables.pop()
+        strtRemove = False
+        adjuster = 0
+        for v in range(0,len(vegetables)):
+            if vegetables[v+adjuster] == "anise" or vegetables[v+adjuster] == "chives" or vegetables[v+adjuster] == "paprika":
+                strtRemove = True
+            if vegetables[v+adjuster] == "arugula" or vegetables[v+adjuster] == "bell pepper" or vegetables[v+adjuster] == "tabasco pepper":
+                strtRemove = False
+            if strtRemove:
+                vegetables.pop(v+adjuster)
+                adjuster -= 1
+        self.vegetables = vegetables
+        return vegetables
+
+    # # Scrape Chinese ingredients
+    # def scrape_chineseingredients(self):
+    #     ingredients = []
+    #     spices = []
+    #     sauces = []
+    #     vegetables = []
+    #     table = self.soup.find_all('td')
+    #     fullHTML = []
+    #     for t in table:
+    #         fullHTML = t.find_all("br")
+    #     for x in range(0, len(fullHTML)):
+    #         ingredients.append(fullHTML[x].text.strip().encode('utf-8').lower())
+    #     self.chinese = ingredients
+    #     return ingredients
+
+
+
+
 class Ingredients:
     def __init__(self,oneIngred,units):
         #special adj that shouldn't appear with a name
-        spe_jj = ['prepared']
-
+        spe_jj = ['prepared','fresh','plain','large','thick']
 
         #extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
@@ -146,7 +196,7 @@ class Ingredients:
         # determine quantity
         # find the first number in a string, and convert str to float
         quantity_str = re.search('[\d*\/\d+|\d+| ]+|$', oneIngred).group()
-        self.quantity = float(sum(Fraction(d) for d in quantity_str.split())) \
+        self.quantity = float("{0:.2f}".format(float(sum(Fraction(d) for d in quantity_str.split())))) \
             if quantity_str and not quantity_str is ' ' else 'none'
 
         # determine measurement, and update quantity if necessary
@@ -171,34 +221,53 @@ class Ingredients:
         #update ingredient string by removing quantity and measurement
         oneIngred = oneIngred.replace(quantity_str,'') if not quantity_str is ' ' else oneIngred
 
-        # determine name
-        name = ''
-        sent = pattern.en.parsetree(oneIngred.split(',')[0])
-        for sentence in sent:
-            for chunk in sentence.chunks:
-                if chunk.type == 'NP':
-                    namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD' and not w.string in spe_jj ]
-                    name = name + ' '.join(namelist) + ' '
-        self.name = name.rstrip()
-
         # tokenization
         tokens = TweetTokenizer().tokenize(oneIngred)
-        token_tag = nltk.pos_tag(tokens)
+        token_tag_org = nltk.pos_tag(tokens)
+        token_tag = []
+
+        #Correct common mistakes of pos tagger
+        for tt in token_tag_org:
+            templist = list(tt)
+            if templist[0] == 'chopped':
+                templist[1] = 'VBD'
+            elif templist[0] == 'plain' or 'less' in templist[0] or 'ground' in templist[0] or ('-' in templist[0] and len(templist[0]) > 1):
+                templist[1] = 'JJ'
+            token_tag.append(tuple(templist))
+
+
 
         #determine descriptor
         # tag lookup: https://pythonprogramming.net/natural-language-toolkit-nltk-part-speech-tagging/
         desp = [word for word, pos in token_tag \
                  if (pos == 'JJ')]
-        self.descriptor = ' '.join(map(str, desp)) if desp else 'none'
+        self.descriptor = ', '.join(map(str, desp)) if desp else 'none'
+
 
         # determine preparation
         prep = [word for word, pos in token_tag \
                  if (pos == 'VBD' or pos == 'VBN' or pos == 'RB')]
         self.preparation = ' '.join(map(str, prep)) if prep else 'none'
 
+        # determine name
+        name = ''
+        sent = pattern.en.parsetree(oneIngred.split(',')[0])
+        for sentence in sent:
+            for chunk in sentence.chunks:
+                if chunk.type == 'NP':
+                    namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD'
+                                and not w.string in spe_jj and not w.string in self.preparation and not '-' in w.string ]
+                    name = name + ' '.join(namelist) + ' '
+        self.name = name.strip()
+
+        if self.name is '':
+            names = [word for word, pos in token_tag\
+                    if (pos.startswith('NN')) and not word.encode('utf-8') in units]
+            self.name = ' '.join(map(str, names)) if names else 'none'
+
 
 class Directions:
-    def __init__(self,oneDir,cooking_methods,othercookingmethods,tools):
+    def __init__(self,oneDir,cooking_methods,othercookingmethods,tools,):
 
         # tokenization and remove stop words
         tokens = TweetTokenizer().tokenize(oneDir)
@@ -209,14 +278,25 @@ class Directions:
 
 
         # check if any primary cooking methods in this direction
-        self.primaryMethods = [pattern.en.lemma(word) for word in tokens if pattern.en.lemma(word) in cooking_methods]
-        self.otherMethods = [pattern.en.lemma(word) for word in tokens
-                             if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word) in cooking_methods ]
+        self.primaryMethods = [pattern.en.lemma(word) for word in tokens if pattern.en.lemma(word).encode('utf-8') in cooking_methods]
+        if len(self.primaryMethods) < 1:
+            self.primaryMethods = ['none']
 
+        self.otherMethods = [pattern.en.lemma(word) for word in tokens
+                             if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word).encode('utf-8') in cooking_methods ]
+        if len(self.otherMethods) < 1:
+            self.otherMethods = ['none']
 
         # check if any tool is used in this direction
         self.tools = [t for t in tools if oneDir.find(t) > 0]
+        if len(self.tools) < 1:
+            self.tools = ['none']
 
+        cookingtime = re.findall(r'[\d*\/\d+|\d+|\d.]*\b[ to ]*\b[\d*\/\d+|\d+|\d.]+\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',oneDir)
+        self.cookingtime = cookingtime if cookingtime else ['none']
+        self.cookingtime = [c.strip() for c in self.cookingtime]
+
+ 
 class AltCook:
     def __init__(self,type,pm,alts):
         self.type = type
@@ -225,7 +305,7 @@ class AltCook:
 
 
     def getAlts(self, type, pm):
-        if(type == self.type and pm == self.pm):
+        if(type == self.type and (pm == self.pm or pm == "any")):
             return self.alts
         else:
             return -1

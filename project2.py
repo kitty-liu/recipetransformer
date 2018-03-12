@@ -7,32 +7,40 @@
 
 import project2_preprocess as prep
 import time
+from pattern.text.en import pluralize
 
 
+#Update directions when any ingredient changes. Replace original ingredient to new ingredient
+def updateDirections(directions,org_ingredient,new_ingredient):
+    return [dir.replace(org_ingredient,new_ingredient) for dir in directions]
 
-# right now replacing with tofu but will add other types
-def toVegetarian(ingredientList, meatList):
+def toVegetarian(ingredientList, meatList,directions):
     vegList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,'tofu')
                 ingredient.name = "tofu"
                 ingredient.descriptor = "none"
+                ingredient.measurement = "ounce"
         vegList.append(ingredient)
-    return vegList
+    return vegList,directions
 
-def toVegan(ingredientList, meatList, veganSubs):
+def toVegan(ingredientList, meatList, veganSubs,directions):
     veganList = []
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,'tofu')
                 ingredient.name = "tofu"
                 ingredient.descriptor = "none"
+                ingredient.measurement = "ounce"
         for nonVeg in veganSubs.keys():
             if nonVeg in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,veganSubs[nonVeg])
                 ingredient.name = veganSubs[nonVeg]
         veganList.append(ingredient)
-    return veganList
+    return veganList,directions
 
 def toHealthy(ingrediantList, unhealthyList):
     healthyList = []
@@ -57,25 +65,53 @@ def toEasy(ingredientList, commonSpices):
         adj -= 1
     return ingredientList
 
-def toAltMethod(ingredientList, meatList, altMethods, pm, altList):
+def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm):
+    altlt = []
     for ingredient in ingredientList:
         for meat in meatList:
-            if meat in ingredient.name:
+            if meat in ingredient:
                 for alt in altMethods:
                     res = alt.getAlts("meat",pm)
                     if res != -1:
-                        altList = res
-                        break
-    return altList
+                        altlt = res
+                        return altlt
+    # Meat has priority since it is more important if meat is cooked properly
+    for ingredient in ingredientList:
+        for veg in vegetableList:
+            if veg in ingredient:
+                for alt in altMethods:
+                    res = alt.getAlts("veg",pm)
+                    if res != -1:
+                        altlt = res
+                        return altlt
+    altlt.append("")
+    return altlt
 
-def toItalian():
-    print "italian"
+def toChinese(ingredientList, chineseIngredients, directions):
+    chList = []
+    for ingredient in ingredientList:
+        for sauce in chineseIngredients[1]:
+            if sauce in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,chineseIngredients[1][sauce])
+                ingredient.name = chineseIngredients[1][sauce]
+        chList.append(ingredient)
+    for spice in chineseIngredients[0]:
+        chList.append(spice)
+    #     need to add to direction list
+    return chList,directions
 
 
 #Main function
 def main():
     start_time = time.time()
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese: "))
+
+    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese']
+    if transformation in options:
+        print 'Transforming to ' + transformation + '...\n'
+    else:
+        print ' Your option(' + transformation + ') is not available. Analyzing original recipe...\n'
+
     mod = 'html.parser'
 
     #scrape units
@@ -107,6 +143,10 @@ def main():
     meatList = meatlist_sp.scrape_meats()
     meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
 
+    vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
+    vegetableList_sp = prep.Scraper(vegetable_page, mod)
+    vegetableList = vegetableList_sp.scrape_vegtables()
+
     veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
                  "honey": "agave syrup", "cheese": "nutritional yeast"}
 
@@ -125,21 +165,45 @@ def main():
     bake = "bake"
     mw = "microwave"
     df = "deepfry"
+    st = "steam"
+    any = "any"
     altMethods = []
     altMethods.append(prep.AltCook("meat",bake,[pf, mw]))
     altMethods.append(prep.AltCook("meat", pf, [df, bake, mw]))
     altMethods.append(prep.AltCook("meat", mw, [pf, bake]))
     altMethods.append(prep.AltCook("meat", df, [pf, bake]))
+    altMethods.append(prep.AltCook("veg", any, [st]))
+
+    #Chinese Ingredients
+    # chinese_ingredientspage = "https://www.china-family-adventure.com/chinese-food-ingredients.html"
+    # chList_sp = prep.Scraper(chinese_ingredientspage, mod)
+    # chList = chList_sp.scrape_chineseingredients()
+    # chineseSpices= chList[0]
+    # chineseSauces = [1]
+    # chineseVegetables = [2]
+    ginger = prep.Ingredients('1 tablespoon chopped ginger', units)
+    garlic = prep.Ingredients('1 tablespoon minced garlic',units)
+    star_anise = prep.Ingredients('2 star anise',units)
+    five_spice = prep.Ingredients('1 teaspoon fivespice',units)
+    chineseSpices = [ginger, garlic, star_anise, five_spice]
+    chineseSauces = {"oil": "sesame oil", "vinegar": "rice vineage", "sauce": "soy sauce", "chili": "chili paste"}
+    chineseVegetables = ["bok choy", "chinese eggplant", "chinese cabbage", "soy bean sprouts", "snow peas", "white radish", "bamboo shoots"]
+    chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
+
     #test pages:
     #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
-    qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
 
     #test quatity&measurement conversion:
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
+
+    #qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
+    #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -159,53 +223,96 @@ def main():
         prepIngredients.append(prep.Ingredients(igd, units))
 
     # Parse directions
-    primary_cookingmethods = []
+    primary_cookingmethods_list = []
     other_cookingmethods = []
     used_tools = []
+    steps_time = []
+    #steps_test = []
 
     for dir in directions:
-        direction = prep.Directions(dir, primarycookingmethods, othercookingmethods, tools)
+        direction = prep.Directions(dir, primarycookingmethods, othercookingmethods, tools,)
         if direction.primaryMethods:
-            primary_cookingmethods.append(direction.primaryMethods)
+            primary_cookingmethods_list.append(direction.primaryMethods)
         if direction.tools:
             used_tools.append(direction.tools)
         if direction.otherMethods:
             other_cookingmethods.append(direction.otherMethods)
+        if direction.cookingtime:
+            steps_time.append(direction.cookingtime)
+        #if direction.step:
+            #steps_test.append(direction.step)
+    stepIngredients = []
+    for i in range(len(directions)):
+        igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
+        if len(igd_for_dir) < 1:
+            igd_for_dir = ['none']
+        stepIng = ', '.join(igd_for_dir)
+        stepIngredients.append(stepIng.split(', '))
+
 
     # Transform Ingredient List based on input
-    primary_cookingmethods = [item for sublist in primary_cookingmethods for item in sublist]
-    pm = ''.join(set(primary_cookingmethods))
+    primary_cookingmethods = [item for sublist in primary_cookingmethods_list for item in sublist if not item is 'none']
     if transformation == "vegetarian":
-        toVegetarian(prepIngredients, meatList)
+        prepIngredients,directions = toVegetarian(prepIngredients, meatList,directions)
     elif transformation == "vegan":
-        toVegan(prepIngredients, meatList, veganSubs)
+        prepIngredients,directions = toVegan(prepIngredients, meatList, veganSubs,directions)
     elif transformation == "easy":
-        ingredientList = toEasy(prepIngredients, commonSpices)
+        prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "altmethod":
+        count1 = 0
+        for pm in primary_cookingmethods_list:
+            altList.append(toAltMethod(stepIngredients[count1], vegetableList, meatList, altMethods, pm[0].encode('utf-8')))
+            count1 += 1
         altList = toAltMethod(prepIngredients, meatList, altMethods, pm, altList)
+    elif transformation == "chinese":
+        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, directions)
 
+    print 'Transformed', directions
     # Prepped ingredients
     for ingredient in prepIngredients:
         print '\n'
         print 'name: ' + ingredient.name
         print 'quantity: ' + str(ingredient.quantity)
-        print 'measurement: ' + ingredient.measurement
+        print 'measurement: ' + ingredient.measurement if ingredient.quantity <= 1 or ingredient.measurement is 'none' \
+            else 'measurement: ' + pluralize(ingredient.measurement)
         print 'descriptor: ' + ingredient.descriptor
         print 'preparation: ' + ingredient.preparation
 
 
+    steps = []
+    for i in range(len(directions)):
+        igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
+        if len(igd_for_dir) < 1:
+            igd_for_dir = ['none']
+        alttxt = ""
+        if altList[i][0] != "":
+            print altList[i][0]
+            alttxt = "Alternate Cooking Method: " + ' ,'.join(altList[i])
+            alttxt += ' | '
+        steps.append('Step ' + str(i+1) + ': | ' + 'Ingredients: ' + ', '.join(igd_for_dir) + ' | ' + 'Tool: ' +
+                     ', '.join(used_tools[i]) + ' | ' + 'Primary Cooking Methods: ' + ', '.join(primary_cookingmethods_list[i])
+                     + ' | '+ alttxt + 'Other Cooking Methods: ' + ', '.join(other_cookingmethods[i]) + ' | ' + 'Time: ' +
+                     ', '.join(steps_time[i]))
 
-    #flatten a list
-    print '\nPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
 
-    if len(altList) != 0:
-        print '\nAlternative cooking methods:', ', '.join(set(altList))
 
-    other_cookingmethods = [item for sublist in other_cookingmethods for item in sublist]
-    print '\nOther cooking methods:', ', '.join(set(other_cookingmethods))
+    used_tools = [item for sublist in used_tools for item in sublist if not item is 'none']
+    print '\nTools:\n', ', '.join(set(used_tools)) if len(used_tools) > 0 else 'none'
 
-    used_tools = [item for sublist in used_tools for item in sublist]
-    print '\nTools:', ', '.join(set(used_tools))
+    print '\nMethods:'
+    print '\tPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
+
+    #if len(altList) != 0:
+        #print '\tAlternative cooking methods:', ', '.join(set(altList))
+
+    other_cookingmethods = [item for sublist in other_cookingmethods for item in sublist if not item is 'none']
+    print '\tOther cooking methods:', ', '.join(set(other_cookingmethods)) if len(other_cookingmethods) > 0 else 'none'
+
+    print '\nSteps:'
+    for s in steps:
+        print '\n'.join(s.split(' | '))
+        print '\n'
+
 
 
 
