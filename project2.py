@@ -80,7 +80,7 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("meat",pm)
                     if res != -1:
-                        directions = updateDirections_methods(directions,pm,' or '.join(set(res)))
+                        #directions = updateDirections_methods(directions,pm,' or '.join(set(res)))
                         altlt = res
                         return altlt,directions,pm
     # Meat has priority since it is more important if meat is cooked properly
@@ -90,7 +90,7 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("veg",pm)
                     if res != -1:
-                        directions = updateDirections_methods(directions, pm, ' or '.join(set(res)))
+                        #directions = updateDirections_methods(directions, pm, ' or '.join(set(res)))
                         altlt = res
                         return altlt, directions,pm
 
@@ -200,12 +200,12 @@ def main():
     print gingertest.transformed_method
 
     #test pages:
-    #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
-    qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
 
     #test quatity&measurement conversion:
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
@@ -250,12 +250,15 @@ def main():
 
 
     stepIngredients = []
-    for i in range(len(directions)):
+    igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[0]])
+    stepIngredients.append(igd_for_dir)
+    for i in range(1,len(directions)):
         igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
         if len(igd_for_dir) < 1:
-            igd_for_dir = ['none']
-        stepIng = ', '.join(igd_for_dir)
-        stepIngredients.append(stepIng.split(', '))
+            stepIngredients.append(stepIngredients[i-1])
+        else:
+            stepIng = ', '.join(igd_for_dir)
+            stepIngredients.append(stepIng.split(', '))
 
 
     # Transform Ingredient List based on input
@@ -288,15 +291,15 @@ def main():
 
 
     steps = []
-    all_altermethod = ''
+    all_altermethod = []
     for i in range(len(directions)):
         igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[i]])
         if len(igd_for_dir) < 1:
             igd_for_dir = ['none']
         alttxt = ""
         if altList and altList[i][0] != "":
-            alttxt = "Alternate Cooking Method: " + pm_list[i] + ' --> '+' ,'.join(altList[i])
-            all_altermethod = all_altermethod + pm_list[i] + ' --> ' + ' ,'.join(altList[i]) + ' '
+            alttxt = "Alternate Cooking Method: " + pm_list[i] + ' --> '+', '.join(altList[i])
+            all_altermethod.append(pm_list[i] + ' --> ' + ' ,'.join(altList[i]))
             alttxt += ' | '
         steps.append('Step ' + str(i+1) + ': | ' + 'Ingredients: ' + ', '.join(set(igd_for_dir)) + ' | ' + 'Tools: ' +
                      ', '.join(set(used_tools[i])) + ' | ' + 'Primary Cooking Methods: ' + ', '.join(set(primary_cookingmethods_list[i]))
@@ -312,7 +315,7 @@ def main():
     print '\tPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
     if transformation == "altmethod":
         if all_altermethod:
-            print "\tAlternate Cooking Methods: " + all_altermethod
+            print "\tAlternate Cooking Methods: " + ', '.join(set(all_altermethod))
         else:
             print "\tAlternate Cooking Methods: No alternate cooking method is available for this recipe."
 
@@ -326,7 +329,6 @@ def main():
     for s in steps:
         print '\n'.join(s.split(' | '))
         print '\n'
-
 
 
 
