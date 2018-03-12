@@ -103,8 +103,23 @@ class Scraper:
             fullHTML = art.find_all("li")
         for x in range(0, len(fullHTML)):
             meats.append(fullHTML[x].text.strip().encode('utf-8').lower())
-        self.meats = meats
         return meats
+
+    # # Scrape Chinese ingredients
+    # def scrape_chineseingredients(self):
+    #     ingredients = []
+    #     spices = []
+    #     sauces = []
+    #     vegetables = []
+    #     table = self.soup.find_all('td')
+    #     fullHTML = []
+    #     for t in table:
+    #         fullHTML = t.find_all("br")
+    #     for x in range(0, len(fullHTML)):
+    #         ingredients.append(fullHTML[x].text.strip().encode('utf-8').lower())
+    #     self.chinese = ingredients
+    #     return ingredients
+
 
 
 class Ingredients:

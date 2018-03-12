@@ -14,7 +14,6 @@ from pattern.text.en import pluralize
 def updateDirections(directions,org_ingredient,new_ingredient):
     return [dir.replace(org_ingredient,new_ingredient) for dir in directions]
 
-# right now replacing with tofu but will add other types
 def toVegetarian(ingredientList, meatList,directions):
     vegList = []
     for ingredient in ingredientList:
@@ -72,16 +71,26 @@ def toAltMethod(ingredientList, meatList, altMethods, pm, altList):
                         break
     return altList
 
-def toItalian():
-    print "italian"
+def toChinese(ingredientList, chineseIngredients, directions):
+    chList = []
+    for ingredient in ingredientList:
+        for sauce in chineseIngredients[1]:
+            if sauce in ingredient.name:
+                directions = updateDirections(directions,ingredient.name,chineseIngredients[1][sauce])
+                ingredient.name = chineseIngredients[1][sauce]
+        chList.append(ingredient)
+    for spice in chineseIngredients[0]:
+        chList.append(spice)
+    #     need to add to direction list
+    return chList,directions
 
 
 #Main function
 def main():
     start_time = time.time()
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese: "))
 
-    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy']
+    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese']
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
@@ -136,6 +145,21 @@ def main():
     altMethods.append(prep.AltCook("meat", mw, [pf, bake]))
     altMethods.append(prep.AltCook("meat", df, [pf, bake]))
 
+    #Chinese Ingredients
+    # chinese_ingredientspage = "https://www.china-family-adventure.com/chinese-food-ingredients.html"
+    # chList_sp = prep.Scraper(chinese_ingredientspage, mod)
+    # chList = chList_sp.scrape_chineseingredients()
+    # chineseSpices= chList[0]
+    # chineseSauces = [1]
+    # chineseVegetables = [2]
+    ginger = prep.Ingredients('1 tablespoon chopped ginger', units)
+    garlic = prep.Ingredients('1 tablespoon minced garlic',units)
+    star_anise = prep.Ingredients('2 star anise',units)
+    five_spice = prep.Ingredients('1 teaspoon fivespice',units)
+    chineseSpices = [ginger, garlic, star_anise, five_spice]
+    chineseSauces = {"oil": "sesame oil", "vinegar": "rice vineage", "sauce": "soy sauce", "chili": "chili paste"}
+    chineseVegetables = ["bok choy", "chinese eggplant", "chinese cabbage", "soy bean sprouts", "snow peas", "white radish", "bamboo shoots"]
+    chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
     #test pages:
     #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
@@ -200,7 +224,10 @@ def main():
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "altmethod":
         altList = toAltMethod(prepIngredients, meatList, altMethods, pm, altList)
+    elif transformation == "chinese":
+        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, directions)
 
+    print 'Transformed', directions
     # Prepped ingredients
     for ingredient in prepIngredients:
         print '\n'
