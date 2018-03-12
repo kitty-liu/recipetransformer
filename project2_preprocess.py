@@ -103,7 +103,40 @@ class Scraper:
             fullHTML = art.find_all("li")
         for x in range(0, len(fullHTML)):
             meats.append(fullHTML[x].text.strip().encode('utf-8').lower())
+        self.meats = meats
         return meats
+
+    # Scrape vegetables
+    def scrape_vegtables(self):
+        vegetables = []
+        article = self.soup.find_all('div', {"class": "mw-parser-output"})
+        fullHTML = []
+        for art in article:
+            fullHTML = art.find_all("li")
+        for x in range(0, len(fullHTML)):
+            txt = fullHTML[x].text.strip().encode('utf-8').lower()
+            if "legumes" not in txt and \
+            "beans" not in txt and \
+            "bean" not in txt and\
+            "peppers" not in txt and\
+            "herbs and spices" not in txt:
+                finalsplitstr = txt.replace('\\','(').replace(':', '(').replace('[','(').split("(")
+                if "\n" not in finalsplitstr[0]:
+                    vegetables.append(finalsplitstr[0])
+        vegetables.pop()
+        vegetables.pop()
+        strtRemove = False
+        adjuster = 0
+        for v in range(0,len(vegetables)):
+            if vegetables[v+adjuster] == "anise" or vegetables[v+adjuster] == "chives" or vegetables[v+adjuster] == "paprika":
+                strtRemove = True
+            if vegetables[v+adjuster] == "arugula" or vegetables[v+adjuster] == "bell pepper" or vegetables[v+adjuster] == "tabasco pepper":
+                strtRemove = False
+            if strtRemove:
+                vegetables.pop(v+adjuster)
+                adjuster -= 1
+        self.vegetables = vegetables
+        return vegetables
 
     # # Scrape Chinese ingredients
     # def scrape_chineseingredients(self):
@@ -247,7 +280,7 @@ class AltCook:
 
 
     def getAlts(self, type, pm):
-        if(type == self.type and pm == self.pm):
+        if(type == self.type and (pm == self.pm or pm == "any")):
             return self.alts
         else:
             return -1
