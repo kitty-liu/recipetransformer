@@ -8,6 +8,7 @@
 import project2_preprocess as prep
 import time
 from pattern.text.en import pluralize
+import ingredients as ingred
 
 
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
@@ -97,19 +98,19 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
     altlt.append("")
     return altlt,directions,''
 
-def toChinese(ingredientList, chineseIngredients, directions):
+def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
     chList = []
+    spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
+    i = 0
     for ingredient in ingredientList:
-        for sauce in chineseIngredients[1]:
-            if sauce in ingredient.name:
-                directions = updateDirections_ingredients(directions,ingredient.name,chineseIngredients[1][sauce])
-                ingredient.name = chineseIngredients[1][sauce]
+        if ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+            directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[0][i].name)
+            tempquantity = ingredient.quantity
+            ingredient = chineseIngredients[0][i]
+            ingredient.quantity = tempquantity
+            i += 1
         chList.append(ingredient)
-    for spice in chineseIngredients[0]:
-        chList.append(spice)
-    #     need to add to direction list
     return chList,directions
-
 
 #Main function
 def main():
@@ -179,30 +180,31 @@ def main():
     altMethods.append(prep.AltCook("meat", df, [pf, bake]))
     altMethods.append(prep.AltCook("veg", any, [st]))
 
+    # CUISINE TRANSFORMATION LISTS
+    commonSpices = ["salt", "pepper", "garlic powder", "onion powder", "water", "butter", "olive oil", "oil"]
+
+    commonVegetables = ['potato', 'corn', 'green bean', 'broccoli', 'carrot', 'tomato', 'cucumber', 'onion',
+                        'spinach', 'sweet potato', 'mushroom', 'cauliflower', 'celery', 'zucchini', 'jalapeno',
+                        'eggplant', 'yam', 'leek']
+    commonOther = ["olive oil", "water", "sugar", "butter"]
+
+
     #Chinese Ingredients
-    # chinese_ingredientspage = "https://www.china-family-adventure.com/chinese-food-ingredients.html"
-    # chList_sp = prep.Scraper(chinese_ingredientspage, mod)
-    # chList = chList_sp.scrape_chineseingredients()
-    # chineseSpices= chList[0]
-    # chineseSauces = [1]
-    # chineseVegetables = [2]
-    ginger = prep.Ingredients('1 tablespoon chopped ginger', units)
-    garlic = prep.Ingredients('1 tablespoon minced garlic',units)
-    star_anise = prep.Ingredients('2 star anise',units)
-    five_spice = prep.Ingredients('1 teaspoon fivespice',units)
-    chineseSpices = [ginger, garlic, star_anise, five_spice]
-    chineseSauces = {"oil": "sesame oil", "vinegar": "rice vineage", "sauce": "soy sauce", "chili": "chili paste"}
-    chineseVegetables = ["bok choy", "chinese eggplant", "chinese cabbage", "soy bean sprouts", "snow peas", "white radish", "bamboo shoots"]
+    chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.peppercorn, ingred.chinesecinnamon,
+                     ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder]
+    chineseSauces = [ingred.ricevinegar, ingred.soysauce, ingred.sesameoil, ingred.chilipaste]
+    chineseVegetables = [ingred.bokchoy, ingred.chives, ingred.greenonion, ingred.chinesecabbage, ingred.beanspouts, ingred.whiteradish, ingred.bambooshoots]
+    # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
     #example to add a cooking method for ginger
-    gingertest = prep.Ingredients('1 tablespoon chopped ginger', units,'stir fry')
-    print gingertest.transformed_method
+    # gingertest = prep.Ingredients('1 tablespoon chopped ginger', units,'stir fry')
+    # print gingertest.transformed_method
 
     #test pages:
-    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
-    #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
+    # qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
     #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
@@ -214,6 +216,7 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
     #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
 
+    qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
@@ -277,7 +280,7 @@ def main():
             pm_list.append(org_method)
             count1 += 1
     elif transformation == "chinese":
-        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, directions)
+        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, commonSpices, directions)
 
     # Prepped ingredients
     for ingredient in prepIngredients:

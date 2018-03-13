@@ -164,7 +164,7 @@ class Ingredients:
             self.transformed_method = ''
 
         # special adj that shouldn't appear with a name
-        spe_jj = ['prepared', 'fresh', 'plain', 'large', 'thick']
+        spe_jj = ['prepared', 'fresh', 'plain', 'large', 'thick', 'ground']
 
         # extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
