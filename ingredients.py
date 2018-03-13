@@ -11,7 +11,12 @@ units = unit_sp.scrape_unit()
 
 
 # Meat Replacements
-
+tofu = prep.Ingredients('1 cup sliced tofu', units, 'seared')
+tempeh = prep.Ingredients('1/2 cup sliced temeph', units, 'steamed')
+texturedvegprote = prep.Ingredients('1/2 cup textured vegetable protein', units, 'boil')
+jackfruit = prep.Ingredients('1 cup jackfruit', units, 'boil')
+mushrooms = prep.Ingredients('1 cup chopped mushrooms', units, 'sautee')
+lentils = prep.Ingredients('3/4 cup lentils', units, 'boil')
 
 
 # Chinese Spices

@@ -13,7 +13,18 @@ import ingredients as ingred
 
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
-    return [dir.replace(org_ingredient,new_ingredient) for dir in directions]
+    if any(org_ingredient in dir for dir in directions):
+        return [dir.replace(org_ingredient, new_ingredient) for dir in directions]
+    else:  #edge case when the ingredient name changes and only part of the name appears in the directions
+        original = org_ingredient.split()
+        for name in original:
+            for i in xrange(len(directions)):
+                if name in directions[i]:
+                    directions[i] = directions[i].replace(name, new_ingredient)
+                    print directions[i]
+                    return directions
+        return directions
+
 
 
 #Update directions when any cooking method changes. Replace original cooking method to new cooking method and update
@@ -27,17 +38,21 @@ def updateDirections_methods(directions,org_method,new_method):
         newdir.append(dir)
     return newdir
 
-def toVegetarian(ingredientList, meatList,directions):
+def toVegetarian(ingredientList, meatList, meatSubs, directions):
     vegList = []
+    i = 0
     for ingredient in ingredientList:
-        for meat in meatList:
-            if meat in ingredient.name:
-                directions = updateDirections_ingredients(directions,ingredient.name,'tofu')
-                ingredient.name = "tofu"
-                ingredient.descriptor = "none"
-                ingredient.measurement = "ounce"
+        name = ingredient.name.split()
+        for word in name:
+            if word in meatList:
+                directions = updateDirections_ingredients(directions, ingredient.name, meatSubs[i].name)
+                # directions = updateDirections_methods(directions, ingredient., meatSubs[i].transformed_method)
+                ingredient = meatSubs[i]
+                i += 1
+                break
         vegList.append(ingredient)
-    return vegList,directions
+    directions = [dir.replace("meat", "") for dir in directions]
+    return vegList, directions
 
 def toVegan(ingredientList, meatList, veganSubs,directions):
     veganList = []
@@ -148,16 +163,20 @@ def main():
     tools = tools_sp.scrape_tools()
 
 
+    # VEGETARIAN
     #scrape meat
     meat_page = "http://naturalhealthtechniques.com/list-of-meats-and-poultry/"
     meatlist_sp = prep.Scraper(meat_page, mod)
     meatList = meatlist_sp.scrape_meats()
-    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham"))
+    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "ribs", "steak"))
+    print "Meat List" ,meatList
 
+    meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
     vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
     vegetableList_sp = prep.Scraper(vegetable_page, mod)
     vegetableList = vegetableList_sp.scrape_vegtables()
 
+    # VEGAN
     veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
                  "honey": "agave syrup", "cheese": "nutritional yeast"}
 
@@ -203,7 +222,7 @@ def main():
 
     #test pages:
     # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
-    #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
+    # qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     # qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
@@ -267,7 +286,7 @@ def main():
     # Transform Ingredient List based on input
     primary_cookingmethods = [item for sublist in primary_cookingmethods_list for item in sublist if not item is 'none']
     if transformation == "vegetarian":
-        prepIngredients,directions = toVegetarian(prepIngredients, meatList,directions)
+        prepIngredients,directions = toVegetarian(prepIngredients, meatList, meatSubs, directions)
     elif transformation == "vegan":
         prepIngredients,directions = toVegan(prepIngredients, meatList, veganSubs,directions)
     elif transformation == "easy":
