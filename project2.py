@@ -15,7 +15,7 @@ import ingredients as ingred
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
     if any(org_ingredient in dir for dir in directions):
         directions = [dir.replace(org_ingredient, new_ingredient) for dir in directions]
-    elif org_ingredient[-1:] is "s":
+    if org_ingredient[-1:] is "s":
         if any(org_ingredient[:-1] in dir for dir in directions):
             directions = [dir.replace(org_ingredient[:-1], new_ingredient) for dir in directions]
     #edge case when the ingredient name changes and only part of the name appears in the directions
@@ -55,24 +55,35 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
                 break
         vegList.append(ingredient)
     # for meat in meatList:
-    directions = [dir.replace("meat", "tofu") for dir in directions]
-    directions = [dir.replace("bone", "middle") for dir in directions]
+    for j in xrange(len(directions)):
+        directions[j] = directions[j].replace("meat", "tofu")
+        directions[j] = directions[j].replace("bone", "middle")
     return vegList, directions
 
-def toVegan(ingredientList, meatList, veganSubs,directions):
+def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
     veganList = []
+    i = 0
     for ingredient in ingredientList:
-        for meat in meatList:
-            if meat in ingredient.name:
-                directions = updateDirections_ingredients(directions,ingredient.name,'tofu')
-                ingredient.name = "tofu"
-                ingredient.descriptor = "none"
-                ingredient.measurement = "ounce"
+        name = ingredient.name.split()
+        for word in name:
+            if word in meatList:
+                tempquantity = ingredient.quantity
+                directions = updateDirections_ingredients(directions, ingredient.name, meatSubs[i].name)
+                # directions = updateDirections_methods(directions, ingredient., meatSubs[i].transformed_method)
+                ingredient = meatSubs[i]
+                ingredient.quantity = tempquantity
+                i += 1
+                break
         for nonVeg in veganSubs.keys():
             if nonVeg in ingredient.name:
-                directions = updateDirections_ingredients(directions,ingredient.name,veganSubs[nonVeg])
-                ingredient.name = veganSubs[nonVeg]
+                directions = updateDirections_ingredients(directions,ingredient.name,veganSubs[nonVeg].name)
+                ingredient.name = veganSubs[nonVeg].name
         veganList.append(ingredient)
+    # for meat in meatList:
+    for j in xrange(len(directions)):
+        directions[j] = directions[j].replace("meat", "tofu")
+        directions[j] = directions[j].replace("bone", "middle")
+        directions[j] = directions[j].replace("crack", "add")
     return veganList,directions
 
 def toEasy(ingredientList, commonSpices):
@@ -175,14 +186,19 @@ def main():
     meatList = meatlist_sp.scrape_meats()
     meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "ribs", "steak", "bone", "thigh", "thighs"))
 
+    seafood_page ="https://en.wikipedia.org/wiki/List_of_types_of_seafood"
+    seafoodlist_sp = prep.Scraper(seafood_page, mod)
+    seafoodList = seafoodlist_sp.scrape_seafood()
+    meatList.extend(seafoodList)
+    # print seafoodList
+
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
-    vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
-    vegetableList_sp = prep.Scraper(vegetable_page, mod)
-    vegetableList = vegetableList_sp.scrape_vegtables()
 
     # VEGAN
-    veganSubs = {"milk": "almond milk", "yogurt": "coconut yogurt", "eggs": "tofu", "butter": "soy margarine",
-                 "honey": "agave syrup", "cheese": "nutritional yeast"}
+    veganSubs = {"milk": ingred.almondmilk, "cream": ingred.almondmilk, "yogurt": ingred.coconutyogurt, "egg": ingred.silktofu, "butter": ingred.soymarg,
+                 "honey":  ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
+
+
 
     #Easy change
     commonSpices = ["salt", "pepper", "garlic"]
@@ -203,6 +219,10 @@ def main():
     altMethods.append(prep.AltCook("meat", df, [pf, bake]))
     altMethods.append(prep.AltCook("veg", any, [st]))
 
+    vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
+    vegetableList_sp = prep.Scraper(vegetable_page, mod)
+    vegetableList = vegetableList_sp.scrape_vegtables()
+
     # CUISINE TRANSFORMATION LISTS
     commonSpices = ["salt", "pepper", "garlic powder", "onion powder", "water", "butter", "olive oil", "oil"]
 
@@ -220,12 +240,11 @@ def main():
     # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
-    #example to add a cooking method for ginger
-    # gingertest = prep.Ingredients('1 tablespoon chopped ginger', units,'stir fry')
-    # print gingertest.transformed_method
+
+
 
     #test pages:
-    # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     # qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     # qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
@@ -239,7 +258,7 @@ def main():
     # qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
     # qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
 
-    qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
+    # qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
@@ -292,7 +311,7 @@ def main():
     if transformation == "vegetarian":
         prepIngredients,directions = toVegetarian(prepIngredients, meatList, meatSubs, directions)
     elif transformation == "vegan":
-        prepIngredients,directions = toVegan(prepIngredients, meatList, veganSubs,directions)
+        prepIngredients,directions = toVegan(prepIngredients, meatList, meatSubs, veganSubs,directions)
     elif transformation == "easy":
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "altmethod":

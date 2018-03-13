@@ -105,6 +105,13 @@ class Scraper:
         self.meats = meats
         return meats
 
+    # Scrape seafood
+    def scrape_seafood(self):
+        seafood = []
+        fullHTML = self.soup.find_all('li')
+        for x in range(11, 98):
+            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()))
+        return seafood
     # Scrape vegetables
     def scrape_vegtables(self):
         vegetables = []

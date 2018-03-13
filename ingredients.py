@@ -9,7 +9,6 @@ unit_sp = prep.Scraper(unit_page, mod)
 units = unit_sp.scrape_unit()
 
 
-
 # Meat Replacements
 tofu = prep.Ingredients('1 cup sliced tofu', units, 'seared')
 tempeh = prep.Ingredients('1/2 cup sliced temeph', units, 'steamed')
@@ -18,6 +17,14 @@ jackfruit = prep.Ingredients('1 cup jackfruit', units, 'boil')
 mushrooms = prep.Ingredients('1 cup chopped mushrooms', units, 'sautee')
 lentils = prep.Ingredients('3/4 cup lentils', units, 'boil')
 
+# Vegan Replacements
+almondmilk = prep.Ingredients('1/2 cup almond milk', units)
+coconutyogurt = prep.Ingredients('1/2 cup coconut yogurt', units)
+soymarg = prep.Ingredients("2 tablespoon soy margarine", units)
+agave = prep.Ingredients("1 tablespoon agave syrup", units)
+nutyeast = prep.Ingredients("1/4 cup nutritional yeast", units)
+agar = prep.Ingredients("3 tablespoons agar", units)
+silktofu = prep.Ingredients('1 cup chopped silken tofu pieces', units)
 
 # Chinese Spices
 ginger = prep.Ingredients('1 tablespoon minced ginger', units)
