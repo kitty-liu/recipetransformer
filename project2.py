@@ -14,16 +14,17 @@ import ingredients as ingred
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
     if any(org_ingredient in dir for dir in directions):
-        return [dir.replace(org_ingredient, new_ingredient) for dir in directions]
-    else:  #edge case when the ingredient name changes and only part of the name appears in the directions
-        original = org_ingredient.split()
-        for name in original:
-            for i in xrange(len(directions)):
-                if name in directions[i]:
-                    directions[i] = directions[i].replace(name, new_ingredient)
-                    print directions[i]
-                    return directions
-        return directions
+        directions = [dir.replace(org_ingredient, new_ingredient) for dir in directions]
+    elif org_ingredient[-1:] is "s":
+        if any(org_ingredient[:-1] in dir for dir in directions):
+            directions = [dir.replace(org_ingredient[:-1], new_ingredient) for dir in directions]
+    #edge case when the ingredient name changes and only part of the name appears in the directions
+    original = org_ingredient.split()
+    for name in original:
+        for i in xrange(len(directions)):
+            if name in directions[i]:
+                directions[i] = directions[i].replace(name, new_ingredient)
+    return directions
 
 
 
@@ -45,13 +46,17 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
         name = ingredient.name.split()
         for word in name:
             if word in meatList:
+                tempquantity = ingredient.quantity
                 directions = updateDirections_ingredients(directions, ingredient.name, meatSubs[i].name)
                 # directions = updateDirections_methods(directions, ingredient., meatSubs[i].transformed_method)
                 ingredient = meatSubs[i]
+                ingredient.quantity = tempquantity
                 i += 1
                 break
         vegList.append(ingredient)
-    directions = [dir.replace("meat", "") for dir in directions]
+    # for meat in meatList:
+    directions = [dir.replace("meat", "tofu") for dir in directions]
+    directions = [dir.replace("bone", "middle") for dir in directions]
     return vegList, directions
 
 def toVegan(ingredientList, meatList, veganSubs,directions):
@@ -168,8 +173,7 @@ def main():
     meat_page = "http://naturalhealthtechniques.com/list-of-meats-and-poultry/"
     meatlist_sp = prep.Scraper(meat_page, mod)
     meatList = meatlist_sp.scrape_meats()
-    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "ribs", "steak"))
-    print "Meat List" ,meatList
+    meatList.extend(("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "ribs", "steak", "bone", "thigh", "thighs"))
 
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
     vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
@@ -209,8 +213,8 @@ def main():
 
 
     #Chinese Ingredients
-    chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.peppercorn, ingred.chinesecinnamon,
-                     ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder]
+    chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.chinesecinnamon,
+                     ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder, ingred.peppercorn]
     chineseSauces = [ingred.ricevinegar, ingred.soysauce, ingred.sesameoil, ingred.chilipaste]
     chineseVegetables = [ingred.bokchoy, ingred.chives, ingred.greenonion, ingred.chinesecabbage, ingred.beanspouts, ingred.whiteradish, ingred.bambooshoots]
     # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
@@ -226,14 +230,14 @@ def main():
     # qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
-    #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    # qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
 
     #test quatity&measurement conversion:
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
 
     #qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
-    #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
-    #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
+    # qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    # qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
 
     qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #scrape recipe
