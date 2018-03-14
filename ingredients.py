@@ -56,6 +56,20 @@ bambooshoots = prep.Ingredients('1/2 cup bamboo shoots', units)
 chives = prep.Ingredients('1 cup chopped chives', units)
 greenonion = prep.Ingredients('1/2 cup chopped green onion', units)
 
+# Italian Spices
+oregano = prep.Ingredients('1 teaspoon dried oregano', units)
+thyme = prep.Ingredients('1 teaspoon dried thyme', units)
+rosemary = prep.Ingredients('1 teaspoon rosemary', units)
+sage = prep.Ingredients('1 teaspoon dried sage', units)
+basil = prep.Ingredients('1 teaspoon chopped basil', units)
+marjoram = prep.Ingredients('1 teaspoon dried marjoram', units)
+
+# Italian Sauces
+tomatosauce = prep.Ingredients('3 tablespoons tomato sauce', units)
+alfredosauce = prep.Ingredients('2 tablespoons alfredo sauce', units)
+pestosauce = prep.Ingredients('2 tablespoons pesto sauce', units)
+balsamicvinegar = prep.Ingredients('2 tablespoons balsamic vinegar', units)
+
 #Healthy replacements
 turkeybacon = prep.Ingredients('1 piece turkey bacon', units)
 wholegrainbread = prep.Ingredients('2 slices of bread', units)
