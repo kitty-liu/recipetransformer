@@ -15,14 +15,17 @@ checkedIng = []
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
     if any(org_ingredient in dir for dir in directions):
-        # checks for edge case where the same ingredient is separately listed twice
-        if (new_ingredient in checkedIng):
-            return directions
         directions = [dir.replace(org_ingredient, new_ingredient) for dir in directions]
-        checkedIng.append(new_ingredient)
     if org_ingredient[-1:] is "s":
-        if any(org_ingredient[:-1] in dir and not any(org_ingredient) for dir in directions):
+        if any(org_ingredient[:-1] in dir for dir in directions):
             directions = [dir.replace(org_ingredient[:-1], new_ingredient) for dir in directions]
+    #edge case when the ingredient name changes and only part of the name appears in the directions
+    original = org_ingredient.split()
+    for name in original:
+        for i in xrange(len(directions)):
+            if name in directions[i]:
+                directions[i] = directions[i].replace(name, new_ingredient)
+    return directions
 
 
     #edge case when the ingredient name changes and only part of the name appears in the directions
@@ -146,6 +149,11 @@ def toEasy(ingredientList, commonSpices):
 # Transformation: toAltMethod
 def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directions):
     altlt = []
+    if len(pm) == 1:
+        pm =  pm[0].encode('utf-8')
+    else:
+        altlt.append("")
+        return altlt,directions,''
     for ingredient in ingredientList:
         for meat in meatList:
             if meat in ingredient:
@@ -185,15 +193,29 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
         chList.append(ingredient)
     return chList,directions
 
+# Transformation: toItalian (Style of cuisine)
+def toItalian(ingredientList, italianIngredients, commonSpices, directions):
+    itList = []
+    spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
+    i = 0
+    for ingredient in ingredientList:
+        if ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+            directions = updateDirections_ingredients(directions, ingredient.name, italianIngredients[0][i].name)
+            tempquantity = ingredient.quantity
+            ingredient = italianIngredients[0][i]
+            ingredient.quantity = tempquantity
+            i += 1
+        itList.append(ingredient)
+    return itList,directions
 
 #Main function
 def main():
     start_time = time.time()
 
     #Ask for a user input
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese, italian: "))
 
-    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese']
+    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese', 'italian']
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
@@ -268,17 +290,23 @@ def main():
     #Alt Methods
     altList = []
     pm_list = []
-    pf = "pan fry"
+    # Simmer, Stew, and Braise too situational
+    br = "broil"
     bake = "bake"
-    mw = "microwave"
-    df = "deepfry"
+    sr = "sear"
+    gr = "grill"
+    rt = "roast"
+    f = "fry"
+    sa = "saute"
     st = "steam"
     any = "any"
     altMethods = []
-    altMethods.append(prep.AltCook("meat",bake,[pf, mw]))
-    altMethods.append(prep.AltCook("meat", pf, [df, bake, mw]))
-    altMethods.append(prep.AltCook("meat", mw, [pf, bake]))
-    altMethods.append(prep.AltCook("meat", df, [pf, bake]))
+    altMethods.append(prep.AltCook("meat", bake,[br, rt, gr, sr, f]))
+    altMethods.append(prep.AltCook("meat", br, [bake]))
+    altMethods.append(prep.AltCook("meat", sa, [bake, f]))
+    altMethods.append(prep.AltCook("meat", sr, [bake, gr, rt, f]))
+    altMethods.append(prep.AltCook("meat", gr, [bake, sr, rt, f]))
+    altMethods.append(prep.AltCook("meat", rt, [bake, sr, gr, f]))
     altMethods.append(prep.AltCook("veg", any, [st]))
 
     vegetable_page = "https://simple.wikipedia.org/wiki/List_of_vegetables"
@@ -302,7 +330,12 @@ def main():
     # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
+    #Italian Ingredients
+    italianSpices = [ingred.oregano, ingred.thyme, ingred.rosemary, ingred.sage, ingred.basil,
+                     ingred.marjoram]
+    italianSauces = [ingred.tomatosauce, ingred.alfredosauce, ingred.pestosauce, ingred.balsamicvinegar]
 
+    italianIngredients = [italianSpices, italianSauces]
 
 
     #test pages:
@@ -390,7 +423,8 @@ def main():
             count1 += 1
     elif transformation == "chinese":
         prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, commonSpices, directions)
-
+    elif transformation == "italian":
+        prepIngredients,directions = toItalian(prepIngredients, italianIngredients, commonSpices, directions)
 
     #Steps: analyze each direction
     steps = []
