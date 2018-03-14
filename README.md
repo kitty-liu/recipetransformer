@@ -1,7 +1,7 @@
 # recipetransformer
 
 Instruction:
-1. put project2.py and project2_preprocess.py in the same folder.
+1. put project2.py, project2_preprocess.py, ingredients.py and tools.txt in the same folder.
 2. run project2.py
 
 Required library:
