@@ -212,6 +212,8 @@ def main():
     primarycookingmethods_page = 'https://www.thedailymeal.com/cook/15-basic-cooking-methods-you-need-know-slideshow/slide-12'
     primarycookingmethods_sp = prep.Scraper(primarycookingmethods_page,mod)
     primarycookingmethods = primarycookingmethods_sp.scrape_primarycookingmethods()
+    primary_cookingmethods = [pc for pc in primarycookingmethods if not 'fry' in pc]
+    primary_cookingmethods.append('fry')
 
 
     #scrape other cooking methods:
