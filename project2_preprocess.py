@@ -52,7 +52,9 @@ class Scraper:
 
     # Scrape units
     def scrape_unit(self):
-        units = ['can', 'link', 'pinch', 'drop']
+        units = ['can', 'link', 'pinch', 'drop','sprig','package','bottle','piece','jar','dessertspoon','smidgen','dash',
+                 'saltspoon','scruple','coffeespoon','fluid dram','wineglass','teacup','pottle','c','g','kg','l','ml',
+                 'oz','pt','tsp','tbl','tb','tbsp','lb','gal','qt','pn','dr','ds','ssp','csp','dsp']
         fullHTML = self.soup.find_all('td')
         fullHTML = [u.find('strong') for u in fullHTML if u.find('strong')]
         for x in range(0, len(fullHTML)):
@@ -194,7 +196,7 @@ class Ingredients:
             self.transformed_method = ''
 
         # special adj that shouldn't appear with a name
-        spe_jj = ['prepared', 'fresh', 'freshly', 'plain', 'large', 'thick', 'ground','taste']
+        spe_jj = ['prepared', 'fresh', 'freshly', 'plain', 'large', 'thick', 'ground','taste','small','frozen']
 
         # extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
@@ -214,12 +216,42 @@ class Ingredients:
         if words_parenth:
             # if a formal measurement is used, do conversion
             # for example: "2 (6 ounce) cans" will convert to 12(quantity) ounce(measurement)
-            measmt_parenth = re.search('[a-z]+', words_parenth)
-            self.measurement = singularize(measmt_parenth.group()) \
-                if measmt_parenth and singularize(measmt_parenth.group()) in units else 'none'
+            measmt_parenth = re.search('[a-z ]+', words_parenth)
+            self.measurement = singularize(measmt_parenth.group().strip()) \
+                if measmt_parenth and singularize(measmt_parenth.group().strip()) in units else 'none'
+
             quantity_parenth = re.search('[\d*\/\d+|\d+|\d.]+', words_parenth)
-            self.quantity = self.quantity * float(quantity_parenth.group()) if quantity_parenth else self.quantity
-            oneIngred = oneIngred.replace(oneIngred[oneIngred.find(quantity_str) + len(quantity_str):].split()[0], '')
+            quantity_f = float("{0:.2f}".format(float(sum(Fraction(d) for d in quantity_parenth.group().split())))) \
+                if quantity_parenth and not quantity_parenth is ' ' else 'none'
+            self.quantity = self.quantity * quantity_f if quantity_f != 'none' else self.quantity
+
+            next_word = oneIngred[oneIngred.find(quantity_str) + len(quantity_str):].split()[0]
+            oneIngred = oneIngred.replace(next_word, '') if singularize(next_word) in units else oneIngred
+
+            # if the unit is not the word after quantity, check if next two words is a possible unti in parentheses
+            if self.measurement == 'none' and self.quantity != 'none':
+                # Singularize next two words, and check if they are in units list
+                word_in_paren = measmt_parenth.group().strip().split() if measmt_parenth else ['none']
+
+                if len(word_in_paren) >= 2:
+                    next_two_words_paren = word_in_paren[0] + ' ' + word_in_paren[1]
+                    singularized_paren = singularize(word_in_paren[0] + ' ' + word_in_paren[1])
+
+                    tempunit = [u for u in units if singularized_paren == u]
+                    tempunit.sort(key=lambda ele: len(ele))
+                    if len(tempunit) >= 1:
+                        self.measurement = tempunit[len(tempunit) - 1]
+                        oneIngred = oneIngred.replace(next_two_words_paren, '')
+                if len(word_in_paren) >= 1 and self.measurement == 'none':
+                    next_one_words_paren = word_in_paren[0]
+                    singularized_paren = singularize(word_in_paren[0])
+
+                    tempunit = [u for u in units if singularized_paren == u]
+                    tempunit.sort(key=lambda ele: len(ele))
+                    if len(tempunit) >= 1:
+                        self.measurement = tempunit[len(tempunit) - 1]
+                        oneIngred = oneIngred.replace(next_one_words_paren, '')
+
         else:
             # normal case: determine a measurement
             # for example: "6 ounce" will store "ounce" as measurement
@@ -237,14 +269,14 @@ class Ingredients:
             #Singularize next two words, and check if they are in units list
             word_in_ing = oneIngred.split()
             if len(word_in_ing)>=2:
-                next_twp_words = word_in_ing[0]+ ' ' + word_in_ing[1]
+                next_two_words = word_in_ing[0]+ ' ' + word_in_ing[1]
                 singularized_ing = singularize(word_in_ing[0]+ ' ' + word_in_ing[1])
 
                 tempunit = [u for u in units if singularized_ing == u]
                 tempunit.sort(key = lambda ele: len(ele))
                 if len(tempunit) >= 1:
                     self.measurement = tempunit[len(tempunit)-1]
-                    oneIngred = oneIngred.replace(next_twp_words,'')
+                    oneIngred = oneIngred.replace(next_two_words,'')
 
 
         # tokenization
