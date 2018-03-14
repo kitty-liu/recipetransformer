@@ -54,7 +54,6 @@ beanspouts = prep.Ingredients('1 cup bean sprouts', units)
 whiteradish = prep.Ingredients('1 cup chopped white radish', units)
 bambooshoots = prep.Ingredients('1/2 cup bamboo shoots', units)
 chives = prep.Ingredients('1 cup chopped chives', units)
-greenonion = prep.Ingredients('1/2 cup chopped green onion', units)
 
 # Italian Spices
 oregano = prep.Ingredients('1 teaspoon dried oregano', units)

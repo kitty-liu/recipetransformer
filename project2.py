@@ -221,6 +221,10 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
             ingredient = chineseIngredients[0][i]
             ingredient.quantity = tempquantity
             i += 1
+        for j in chineseIngredients[2].keys():
+            if j in ingredient.name or ingredient.name in j:
+                directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[2][j].name)
+                ingredient = chineseIngredients[2][j]
         chList.append(ingredient)
     return chList,directions
 
@@ -297,7 +301,7 @@ def main():
     commonMeatList = ["chicken", "pork", "beef", "lamb", "salmon", "tuna", "duck", "turkey", "ham"]
     # VEGAN
     veganSubs = {"milk": ingred.almondmilk, "cream": ingred.almondmilk, "yogurt": ingred.coconutyogurt, "egg": ingred.silktofu, "butter": ingred.soymarg,
-                 "honey":  ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
+                 "honey": ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
 
     # Healthy Substitutions
     healthySubs = [ingred.turkeybacon, ingred.wholegrainbread, ingred.rolledoats, ingred.fatfreebutterspread,
@@ -316,7 +320,6 @@ def main():
     #unhealthyList = unhealthyList_sp.scrape_healthy()
 
     #Easy change
-    commonSpices = ["salt", "pepper", "garlic"]
 
     #Alt Methods
     altList = []
@@ -357,7 +360,8 @@ def main():
     chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.chinesecinnamon,
                      ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder, ingred.peppercorn]
     chineseSauces = [ingred.ricevinegar, ingred.soysauce, ingred.sesameoil, ingred.chilipaste]
-    chineseVegetables = [ingred.bokchoy, ingred.chives, ingred.greenonion, ingred.chinesecabbage, ingred.beanspouts, ingred.whiteradish, ingred.bambooshoots]
+    chineseVegetables = {"bell pepper": ingred.whiteradish, "asparagus": ingred.bambooshoots, "peas": ingred.beanspouts,
+                         "lettuce": ingred.bokchoy, "brussel sprouts": ingred.chives, "kale": ingred.chinesecabbage}
     # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
@@ -387,8 +391,8 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
-    qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
-
+    # qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
+    qpage = "https://www.allrecipes.com/recipe/90209/italian-peas/"
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
