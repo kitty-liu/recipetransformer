@@ -15,10 +15,20 @@ checkedIng = []
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
     if any(org_ingredient in dir for dir in directions):
+        if (new_ingredient in checkedIng):
+            return directions
         directions = [dir.replace(org_ingredient, new_ingredient) for dir in directions]
+        checkedIng.append(new_ingredient)
+
+    #edge case where the new ingredient includes the name of the original ingredient
+    if org_ingredient in new_ingredient or org_ingredient[:-1] in new_ingredient or new_ingredient in org_ingredient:
+        return directions #stop here to prevent name from being replaced multiple times
+
     if org_ingredient[-1:] is "s":
         if any(org_ingredient[:-1] in dir for dir in directions):
             directions = [dir.replace(org_ingredient[:-1], new_ingredient) for dir in directions]
+
+
     #edge case when the ingredient name changes and only part of the name appears in the directions
     original = org_ingredient.split()
     for name in original:
@@ -26,19 +36,6 @@ def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
             if name in directions[i]:
                 directions[i] = directions[i].replace(name, new_ingredient)
     return directions
-
-
-    #edge case when the ingredient name changes and only part of the name appears in the directions
-    # original = org_ingredient.split()
-    # for name in original:
-    #     for i in xrange(len(directions)):
-    #         if name in directions[i]:
-    #             directions[i] = directions[i].replace(name, new_ingredient)
-
-
-
-    return directions
-
 
 
 #Update directions when any cooking method changes. Replace original cooking method to new cooking method and update
@@ -134,28 +131,33 @@ def toNonVegan(ingredientList, commonMeatList, meatSubs, veganSubs, directions):
         nonVeganList.append(ingredient)
     return nonVeganList, directions
 
-def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
+def toHealthy(ingredientList, healthySubsDict, directions):
     healthyList = []
 
     for ingredient in ingredientList:
         name = ingredient.name.split()
-        for word in name:
-            i = 0
-            for ing in unhealthyList:
-                if word in ing:
-                    tempquantity = ingredient.quantity
-                    directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
-                    ingredient = healthySubs[i]
-                    ingredient.quantity = tempquantity
-                    break
-                i += 1
+        #for word in name:
+        for ing in healthySubsDict.keys():
+            if ing in ingredient.name:
+                if ing == "sugar":
+                    ingredient.quantity = ingredient.quantity/2
+                if "chocolate" in ing:
+                    #for word in ingredient.name:
+                    if "chips" in ing:
+                        directions = updateDirections_ingredients(directions, ingredient.name,
+                                                                  healthySubsDict[ing].name)
+                        ingredient.name = healthySubsDict[ing].name
+                        ingredient.descriptor = healthySubsDict[ing].descriptor
 
-                #break
+                    break
+                #    break #to prevent chocolate ingredients other than chocolate chips from being replaced with chips
+                else:
+                    directions = updateDirections_ingredients(directions, ingredient.name, healthySubsDict[ing].name)
+                    ingredient.name = healthySubsDict[ing].name
+                    ingredient.descriptor = healthySubsDict[ing].descriptor
+                break
+
         healthyList.append(ingredient)
-    # for meat in meatList:
-    # for j in xrange(len(directions)):
-    #     directions[j] = directions[j].replace("meat", "tofu")
-    #     directions[j] = directions[j].replace("bone", "middle")
     return healthyList, directions
 
 def toEasy(ingredientList, commonSpices):
@@ -305,14 +307,19 @@ def main():
                    ingred.leanbeef, ingred.arugula, ingred.reducedfatmayo, ingred.evaporatedskim, ingred.fatfreemilk, ingred.brownrice, ingred.fatfreedressing,
                    ingred.fatfreesourcream, ingred.cookingspray]
 
-    #healthySubsDict = {"bacon": ingred.turkeybacon, "bread": ingred.wholegrainbread, "bread crumbs": ingred.rolledoats, "butter": ingred.fatfreebutterspread}
+    healthySubsDict = {"sugar": ingred.sugar, "bacon": ingred.turkeybacon, "bread": ingred.wholegrainbread, "bread crumbs": ingred.rolledoats, "butter": ingred.fatfreebutterspread, "cream": ingred.halfandhalf,
+                       "cream cheese": ingred.fatfreecreamcheese, "egg": ingred.eggwhites, "flour": ingred.wholewheatflour, "beef": ingred.leanbeef, "lettuce": ingred.arugula,
+                       "mayonnaise": ingred.reducedfatmayo, "evaporated milk": ingred.evaporatedskim, "milk": ingred.fatfreemilk, "rice": ingred.brownrice, "dressing": ingred.fatfreedressing,
+                       "sour cream": ingred.fatfreesourcream, "chocolate chips": ingred.unsweetenedchips}
 
-    unhealthyList = ['bacon', 'bread', 'bread crumbs', 'butter', 'cream', 'cream cheese', 'eggs', 'flour' 'ground beef',
-                   'lettuce', 'mayonnaise', 'evaporated milk', 'milk', 'rice', 'dressing', 'sour cream']
+
+
+    #unhealthyList = ['bacon', 'bread', 'bread crumbs', 'butter', 'cream', 'cream cheese', 'eggs', 'flour' 'ground beef',
+                   #'lettuce', 'mayonnaise', 'evaporated milk', 'milk', 'rice', 'dressing', 'sour cream']
 
     #scrape unhealthy ingredients
-    unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
-    unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
+    #unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
+    #unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
     #unhealthyList = unhealthyList_sp.scrape_healthy()
 
     #Easy change
@@ -370,9 +377,9 @@ def main():
 
 
     #test pages:
-    # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
-    #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
+    qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
     #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
@@ -387,7 +394,9 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
-    qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
+    #qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
+
+    #qpage = 'https://www.allrecipes.com/recipe/7565/too-much-chocolate-cake/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%202'
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -449,7 +458,7 @@ def main():
     elif transformation == "easy":
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "healthy":
-        prepIngredients,directions = toHealthy(prepIngredients, unhealthyList, healthySubs, directions)
+        prepIngredients,directions = toHealthy(prepIngredients, healthySubsDict, directions)
     elif transformation == "altmethod":
         count1 = 0
         for pm in primary_cookingmethods_list:
@@ -477,10 +486,12 @@ def main():
         steps.append('Step ' + str(i+1) + ': | ' + 'Ingredients: ' + ', '.join(set(igd_for_dir)) + ' | ' + 'Tools: ' +
                      ', '.join(set(used_tools[i])) + ' | ' + 'Primary Cooking Methods: ' + ', '.join(set(primary_cookingmethods_list[i]))
                      + ' | '+ alttxt + 'Other Cooking Methods: ' + ', '.join(set(other_cookingmethods[i])) + ' | ' + 'Time: ' +
-                     ', '.join(steps_time[i]) + ' | ' + 'Details: ' + directions[i])
+                     ', '.join(steps_time[i]) + ' | ' + 'Details/Directions: ' + directions[i])
 
 
     # Output: transformed ingredients
+    print '\n'
+    print 'Ingredients:'
     for ingredient in prepIngredients:
         print '\n'
         print 'name: ' + ingredient.name
