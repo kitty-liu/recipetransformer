@@ -75,6 +75,18 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
         directions[j] = directions[j].replace("bone", "middle")
     return vegList, directions
 
+def toNonVegetarian(ingredientList, commonMeatList, meatSubs, directions):
+    nonVegList = []
+    i = 0
+    for ingredient in ingredientList:
+        for meatsub in meatSubs:
+            if ingredient.name in meatsub.name:
+                directions = updateDirections_ingredients(directions, ingredient.name, commonMeatList[i])
+                ingredient.name = commonMeatList[i]
+                i += 1
+                break
+        nonVegList.append(ingredient)
+    return nonVegList, directions
 
 # Transformation: toVegan
 def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
@@ -102,6 +114,25 @@ def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
         directions[j] = directions[j].replace("bone", "middle")
         directions[j] = directions[j].replace("crack", "add")
     return veganList,directions
+
+
+def toNonVegan(ingredientList, commonMeatList, meatSubs, veganSubs, directions):
+    nonVeganList = []
+    nonVeganRepl = {y:x for x,y in veganSubs.iteritems()}
+    i = 0
+    for ingredient in ingredientList:
+        for meatsub in meatSubs:
+            if ingredient.name in meatsub.name:
+                directions = updateDirections_ingredients(directions, ingredient.name, commonMeatList[i])
+                ingredient.name = commonMeatList[i]
+                i += 1
+                break
+        for veg in nonVeganRepl.keys():
+            if veg.name in ingredient.name:
+                directions = updateDirections_ingredients(directions, ingredient.name, veganSubs[veg].name)
+                ingredient.name = veganSubs[veg].name
+        nonVeganList.append(ingredient)
+    return nonVeganList, directions
 
 def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
     healthyList = []
@@ -213,9 +244,9 @@ def main():
     start_time = time.time()
 
     #Ask for a user input
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese, italian: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, nonvegetarian, vegan, nonvegan, healthy, altmethod, easy, chinese, italian: "))
 
-    options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese', 'italian']
+    options = ['vegetarian', 'nonvegetarian', 'vegan', 'nonvegan', 'healthy', 'altmethod', 'easy', 'chinese', 'italian']
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
@@ -263,7 +294,7 @@ def main():
     meatList.extend(seafoodList)
 
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
-
+    commonMeatList = ["chicken", "pork", "beef", "lamb", "salmon", "tuna", "duck", "turkey", "ham"]
     # VEGAN
     veganSubs = {"milk": ingred.almondmilk, "cream": ingred.almondmilk, "yogurt": ingred.coconutyogurt, "egg": ingred.silktofu, "butter": ingred.soymarg,
                  "honey":  ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
@@ -339,7 +370,7 @@ def main():
 
 
     #test pages:
-    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
@@ -356,6 +387,7 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
+    qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -408,8 +440,12 @@ def main():
     primary_cookingmethods = [item for sublist in primary_cookingmethods_list for item in sublist if not item is 'none']
     if transformation == "vegetarian":
         prepIngredients,directions = toVegetarian(prepIngredients, meatList, meatSubs, directions)
+    elif transformation == "nonvegetarian":
+        prepIngredients,directions = toNonVegetarian(prepIngredients, commonMeatList, meatSubs, directions)
     elif transformation == "vegan":
         prepIngredients,directions = toVegan(prepIngredients, meatList, meatSubs, veganSubs,directions)
+    elif transformation == "nonvegan":
+        prepIngredients,directions = toNonVegan(prepIngredients, commonMeatList, meatSubs, veganSubs, directions)
     elif transformation == "easy":
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "healthy":
