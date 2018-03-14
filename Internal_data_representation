@@ -1,0 +1,28 @@
+Class of Ingredients   -    6 attributes:
+- name
+- quantity
+- measurement
+- descriptor
+- preparation
+- transformed_method
+
+Each ingredient sentence is parsed into the Ingredients class. Then name, quantity, measurement, descriptor, preparation are
+extracted and assigned to the right attributes. If any information is not available, 'none' is assigned to the corresponding
+attribute. Transformed_method defines a cooking method for an ingredient if there is a cooking method that is associated with
+a particular ingredient. Otherwise, transformed_method is empty. When we defined a set of meat replacements, we created
+Ingredients objects and defined cooking methods for each of them. During a transformation, attributes may be overwritten based
+on what transformation is called.
+
+
+
+Class of Directions   -   4 attributes:  
+- primaryMethods
+- othermethods
+- tools
+- cookingtime
+
+Each direction sentence is parsed into the Directions class. Then primary cooking methods, other cooking methods, tools and 
+cooking time are extracted and assigned to the right attributes. If any information is not available, 'none' is assigned to 
+the corresponding attribute.
+
+
