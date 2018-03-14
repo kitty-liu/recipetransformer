@@ -107,16 +107,15 @@ def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
         name = ingredient.name.split()
         for word in name:
             i = 0
-            for ing in unhealthyList:
-                if word in ing:
-            #if word in unhealthyDict:
-                    tempquantity = ingredient.quantity
-                    directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
-                    ingredient = healthySubs[i]
-                    ingredient.quantity = tempquantity
-
-                    break
-                i += 1
+            #for ing in unhealthyList:
+                #if word in ing:
+            if word in unhealthyList:
+                tempquantity = ingredient.quantity
+                directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
+                ingredient = healthySubs[i]
+                ingredient.quantity = tempquantity
+                break
+            i += 1
 
                 #break
         healthyList.append(ingredient)
