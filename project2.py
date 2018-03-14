@@ -107,15 +107,14 @@ def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
         name = ingredient.name.split()
         for word in name:
             i = 0
-            #for ing in unhealthyList:
-                #if word in ing:
-            if word in unhealthyList:
-                tempquantity = ingredient.quantity
-                directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
-                ingredient = healthySubs[i]
-                ingredient.quantity = tempquantity
-                break
-            i += 1
+            for ing in unhealthyList:
+                if word in ing:
+                    tempquantity = ingredient.quantity
+                    directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
+                    ingredient = healthySubs[i]
+                    ingredient.quantity = tempquantity
+                    break
+                i += 1
 
                 #break
         healthyList.append(ingredient)
@@ -305,7 +304,7 @@ def main():
 
 
     #test pages:
-    #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
@@ -316,7 +315,7 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
 
     #qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
-    qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
     #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
     #qpage = 'https://www.allrecipes.com/recipe/166622/'
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
