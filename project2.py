@@ -63,7 +63,6 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
             if word in meatList:
                 tempquantity = ingredient.quantity
                 directions = updateDirections_ingredients(directions, ingredient.name, meatSubs[i].name)
-                # directions = updateDirections_methods(directions, ingredient., meatSubs[i].transformed_method)
                 ingredient = meatSubs[i]
                 ingredient.quantity = tempquantity
                 i += 1
@@ -75,6 +74,7 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
         directions[j] = directions[j].replace("bone", "middle")
     return vegList, directions
 
+# Transformation: toNonVegetarian
 def toNonVegetarian(ingredientList, commonMeatList, meatSubs, directions):
     nonVegList = []
     i = 0
@@ -98,7 +98,6 @@ def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
             if word in meatList:
                 tempquantity = ingredient.quantity
                 directions = updateDirections_ingredients(directions, ingredient.name, meatSubs[i].name)
-                # directions = updateDirections_methods(directions, ingredient., meatSubs[i].transformed_method)
                 ingredient = meatSubs[i]
                 ingredient.quantity = tempquantity
                 i += 1
@@ -115,7 +114,7 @@ def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
         directions[j] = directions[j].replace("crack", "add")
     return veganList,directions
 
-
+# Transformation: toNonVegan
 def toNonVegan(ingredientList, commonMeatList, meatSubs, veganSubs, directions):
     nonVeganList = []
     nonVeganRepl = {y:x for x,y in veganSubs.iteritems()}
@@ -134,6 +133,7 @@ def toNonVegan(ingredientList, commonMeatList, meatSubs, veganSubs, directions):
         nonVeganList.append(ingredient)
     return nonVeganList, directions
 
+# Transformation: toHealthy
 def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
     healthyList = []
 
@@ -158,6 +158,8 @@ def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
     #     directions[j] = directions[j].replace("bone", "middle")
     return healthyList, directions
 
+
+# Transformation: DIY to easy (OPTIONAL)
 def toEasy(ingredientList, commonSpices):
     count = 0
     indexes = []
@@ -170,7 +172,6 @@ def toEasy(ingredientList, commonSpices):
             indexes.append(count)
         count += 1
     adj = 0
-    print indexes
     for index in indexes:
         ingredientList.pop(index + adj)
         adj -= 1
@@ -191,7 +192,6 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("meat",pm)
                     if res != -1:
-                        #directions = updateDirections_methods(directions,pm,' or '.join(set(res)))
                         altlt = res
                         return altlt,directions,pm
     # Meat has priority since it is more important if meat is cooked properly
@@ -201,7 +201,6 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("veg",pm)
                     if res != -1:
-                        #directions = updateDirections_methods(directions, pm, ' or '.join(set(res)))
                         altlt = res
                         return altlt, directions,pm
 
@@ -227,6 +226,7 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
                 ingredient = chineseIngredients[2][j]
         chList.append(ingredient)
     return chList,directions
+
 
 # Transformation: toItalian (Style of cuisine)
 def toItalian(ingredientList, italianIngredients, commonSpices, directions):
@@ -319,7 +319,6 @@ def main():
     unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
     #unhealthyList = unhealthyList_sp.scrape_healthy()
 
-    #Easy change
 
     #Alt Methods
     altList = []
@@ -350,11 +349,6 @@ def main():
     # CUISINE TRANSFORMATION LISTS
     commonSpices = ["salt", "pepper", "garlic powder", "onion powder", "water", "butter", "olive oil", "oil"]
 
-    commonVegetables = ['potato', 'corn', 'green bean', 'broccoli', 'carrot', 'tomato', 'cucumber', 'onion',
-                        'spinach', 'sweet potato', 'mushroom', 'cauliflower', 'celery', 'zucchini', 'jalapeno',
-                        'eggplant', 'yam', 'leek']
-    commonOther = ["olive oil", "water", "sugar", "butter"]
-
 
     #Chinese Ingredients
     chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.chinesecinnamon,
@@ -362,7 +356,6 @@ def main():
     chineseSauces = [ingred.ricevinegar, ingred.soysauce, ingred.sesameoil, ingred.chilipaste]
     chineseVegetables = {"bell pepper": ingred.whiteradish, "asparagus": ingred.bambooshoots, "peas": ingred.beanspouts,
                          "lettuce": ingred.bokchoy, "brussel sprouts": ingred.chives, "kale": ingred.chinesecabbage}
-    # chineseSauces = {"oil": "sesame oil", "vinegar": "rice vinegar", "sauce": "soy sauce", "chili": "chili paste"}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
 
     #Italian Ingredients
@@ -374,7 +367,7 @@ def main():
 
 
     #test pages:
-    # qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
     #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
@@ -387,21 +380,17 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
     #qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
     #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
-    #qpage = 'https://www.allrecipes.com/recipe/166622/'
+    #qpage = 'https://www.allrecipes.com/recipe/90209/'
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
     #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
-    # qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
-    qpage = "https://www.allrecipes.com/recipe/90209/italian-peas/"
+    #qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
+    #qpage = 'https://www.allrecipes.com/recipe/14525/beer-steak/?internalSource=recipe%20hub&referringContentType=search%20results&clickId=cardslot%2044'
+
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
-    print 'All ingredients:'
-    print ingredients
-
     directions = recp.scrape_directions()
-    print 'All directions:'
-    print directions
 
 
     prepIngredients = []
@@ -481,23 +470,26 @@ def main():
         steps.append('Step ' + str(i+1) + ': | ' + 'Ingredients: ' + ', '.join(set(igd_for_dir)) + ' | ' + 'Tools: ' +
                      ', '.join(set(used_tools[i])) + ' | ' + 'Primary Cooking Methods: ' + ', '.join(set(primary_cookingmethods_list[i]))
                      + ' | '+ alttxt + 'Other Cooking Methods: ' + ', '.join(set(other_cookingmethods[i])) + ' | ' + 'Time: ' +
-                     ', '.join(steps_time[i]) + ' | ' + 'Details: ' + directions[i])
+                     ', '.join(steps_time[i]) + ' | ' + 'Details/Direction: ' + directions[i])
+
 
 
     # Output: transformed ingredients
+    print 'Ingredients:'
     for ingredient in prepIngredients:
-        print '\n'
         print 'name: ' + ingredient.name
         print 'quantity: ' + str(ingredient.quantity)
         print 'measurement: ' + ingredient.measurement if ingredient.quantity <= 1 or ingredient.measurement is 'none' \
             else 'measurement: ' + pluralize(ingredient.measurement)
         print 'descriptor: ' + ingredient.descriptor
         print 'preparation: ' + ingredient.preparation
+        print '\n'
+
 
 
     # Output: tools
     used_tools = [item for sublist in used_tools for item in sublist if not item is 'none']
-    print '\nTools:\n', ', '.join(set(used_tools)) if len(used_tools) > 0 else 'none'
+    print 'Tools:\n', ', '.join(set(used_tools)) if len(used_tools) > 0 else 'none'
 
     # Output: methods
     print '\nMethods:'
