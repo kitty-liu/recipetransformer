@@ -11,7 +11,7 @@ import re
 from fractions import Fraction
 import nltk
 from nltk.tokenize import TweetTokenizer
-from pattern.text.en import singularize
+from pattern.text.en import singularize,pluralize
 from nltk.corpus import stopwords
 import string
 import pattern.en
@@ -183,6 +183,8 @@ class Scraper:
     #     return ingredients
 
 
+#Class of ingredients
+#Attributes: transformed_method, name, quantity, measurement, descriptor and preparation.
 class Ingredients:
     def __init__(self, oneIngred, units,*kargs):
 
@@ -192,7 +194,7 @@ class Ingredients:
             self.transformed_method = ''
 
         # special adj that shouldn't appear with a name
-        spe_jj = ['prepared', 'fresh', 'plain', 'large', 'thick', 'ground']
+        spe_jj = ['prepared', 'fresh', 'freshly', 'plain', 'large', 'thick', 'ground','taste']
 
         # extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
@@ -228,7 +230,22 @@ class Ingredients:
             oneIngred = oneIngred.replace(measmt, '') if not self.measurement is 'none' else oneIngred
 
         # update ingredient string by removing quantity and measurement
-        oneIngred = oneIngred.replace(quantity_str, '') if not quantity_str is ' ' else oneIngred
+        oneIngred = oneIngred.replace(quantity_str, '').strip() if not quantity_str is ' ' else oneIngred.strip()
+
+        #if the unit is not the word after quantity, check if next two words is a possible unti in ingredient sentence
+        if self.measurement == 'none' and self.quantity != 'none':
+            #Singularize next two words, and check if they are in units list
+            word_in_ing = oneIngred.split()
+            if len(word_in_ing)>=2:
+                next_twp_words = word_in_ing[0]+ ' ' + word_in_ing[1]
+                singularized_ing = singularize(word_in_ing[0]+ ' ' + word_in_ing[1])
+
+                tempunit = [u for u in units if singularized_ing == u]
+                tempunit.sort(key = lambda ele: len(ele))
+                if len(tempunit) >= 1:
+                    self.measurement = tempunit[len(tempunit)-1]
+                    oneIngred = oneIngred.replace(next_twp_words,'')
+
 
         # tokenization
         tokens = TweetTokenizer().tokenize(oneIngred)
@@ -241,12 +258,11 @@ class Ingredients:
             if templist[0] == 'chopped':
                 templist[1] = 'VBD'
             elif templist[0] == 'plain' or 'less' in templist[0] or 'ground' in templist[0] or (
-                    '-' in templist[0] and len(templist[0]) > 1):
+                    '-' in templist[0] and len(templist[0]) > 1) or 'fresh' in templist[0]:
                 templist[1] = 'JJ'
             token_tag.append(tuple(templist))
 
         # determine descriptor
-        # tag lookup: https://pythonprogramming.net/natural-language-toolkit-nltk-part-speech-tagging/
         desp = [word for word, pos in token_tag \
                 if (pos == 'JJ')]
         self.descriptor = ', '.join(map(str, desp)) if desp else 'none'
@@ -273,6 +289,8 @@ class Ingredients:
             self.name = ' '.join(map(str, names)) if names else 'none'
 
 
+# Class of directions
+# Attributes: primaryMethods, othermethods, tools, cookingtime
 class Directions:
     def __init__(self, oneDir, cooking_methods, othercookingmethods, tools):
 
@@ -280,14 +298,16 @@ class Directions:
         tokens = TweetTokenizer().tokenize(oneDir)
         stop = stopwords.words('english') + list(string.punctuation)
         tokens = [word.encode('utf-8') for word in tokens if not word in stop and len(word) > 2]
-        token_tag = nltk.pos_tag(tokens)
 
         # check if any primary cooking methods in this direction
+        # Lemmatization is used
         self.primaryMethods = [pattern.en.lemma(word) for word in tokens if
                                pattern.en.lemma(word).encode('utf-8') in cooking_methods]
         if len(self.primaryMethods) < 1:
             self.primaryMethods = ['none']
 
+        # check if any other cooking methods in this direction
+        # Lemmatization is used
         self.otherMethods = [pattern.en.lemma(word) for word in tokens
                              if pattern.en.lemma(word) in othercookingmethods and not pattern.en.lemma(word).encode(
                 'utf-8') in cooking_methods]
@@ -299,19 +319,23 @@ class Directions:
         if len(self.tools) < 1:
             self.tools = ['none']
 
+        # extract cooking times from a direction
         cookingtime = re.findall(
-            r'[\d*\/\d+|\d+|\d.]*\b[ to ]*\b[\d*\/\d+|\d+|\d.]+\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',
+            r'[\d*\/\d+|\d+|\d.]+\s*\b(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)*(?: to )*\b[\d*\/\d+|\d+|\d.]*\s*(?:hours?\b|hrs?\b|h\b|seconds?\b|s\b|minutes?\b|min\b)',
             oneDir)
         self.cookingtime = cookingtime if cookingtime else ['none']
         self.cookingtime = [c.strip() for c in self.cookingtime]
 
 
+# Class of altCook
+# Attributes: type(meat or vegetables), pm(primary cooking methods), alts(alternative cooking methods)
 class AltCook:
     def __init__(self, type, pm, alts):
         self.type = type
         self.pm = pm
         self.alts = alts
 
+    # Return alternative cooking methods
     def getAlts(self, type, pm):
         if (type == self.type and (pm == self.pm or pm == "any")):
             return self.alts

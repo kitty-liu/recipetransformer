@@ -49,6 +49,8 @@ def updateDirections_methods(directions,org_method,new_method):
         newdir.append(dir)
     return newdir
 
+
+# Transformation: toVegetarian
 def toVegetarian(ingredientList, meatList, meatSubs, directions):
     vegList = []
     i = 0
@@ -70,6 +72,8 @@ def toVegetarian(ingredientList, meatList, meatSubs, directions):
         directions[j] = directions[j].replace("bone", "middle")
     return vegList, directions
 
+
+# Transformation: toVegan
 def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
     veganList = []
     i = 0
@@ -122,8 +126,6 @@ def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
     #     directions[j] = directions[j].replace("bone", "middle")
     return healthyList, directions
 
-
-
 def toEasy(ingredientList, commonSpices):
     count = 0
     indexes = []
@@ -142,6 +144,8 @@ def toEasy(ingredientList, commonSpices):
         adj -= 1
     return ingredientList
 
+
+# Transformation: toAltMethod
 def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directions):
     altlt = []
     for ingredient in ingredientList:
@@ -167,6 +171,8 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
     altlt.append("")
     return altlt,directions,''
 
+
+# Transformation: toChinese (Style of cuisine)
 def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
     chList = []
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
@@ -181,9 +187,12 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
         chList.append(ingredient)
     return chList,directions
 
+
 #Main function
 def main():
     start_time = time.time()
+
+    #Ask for a user input
     transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, vegan, healthy, altmethod, easy, chinese: "))
 
     options = ['vegetarian','vegan', 'healthy', 'altmethod', 'easy', 'chinese']
@@ -192,6 +201,8 @@ def main():
     else:
         print ' Your option(' + transformation + ') is not available. Analyzing original recipe...\n'
 
+
+    #Scrape necessary lists: including units, primary cooking methods, other cooking methods, tools, meat,vegetable
     mod = 'html.parser'
 
     #scrape units
@@ -228,7 +239,6 @@ def main():
     seafoodlist_sp = prep.Scraper(seafood_page, mod)
     seafoodList = seafoodlist_sp.scrape_seafood()
     meatList.extend(seafoodList)
-    # print seafoodList
 
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
 
@@ -251,7 +261,6 @@ def main():
     unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
     unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
     #unhealthyList = unhealthyList_sp.scrape_healthy()
-
 
     #Easy change
     commonSpices = ["salt", "pepper", "garlic"]
@@ -297,21 +306,24 @@ def main():
 
 
     #test pages:
-    qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
-    # qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
-    # qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
+    #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
+    #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
+    #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
-    # qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
 
     #test quatity&measurement conversion:
     #qpage = 'https://www.allrecipes.com/recipe/217228/blood-and-sand-cocktail/?internalSource=rotd&referringId=80&referringContentType=recipe%20hub'
 
     #qpage = 'https://www.allrecipes.com/recipe/20545/bruschetta-iii/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2022'
-    # qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
-    # qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
+    qpage = 'https://www.allrecipes.com/recipe/262622/indian-chicken-tikka-masala/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
+    #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
+    #qpage = 'https://www.allrecipes.com/recipe/166622/'
+    #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
+    #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
-    # qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
+
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
@@ -346,7 +358,7 @@ def main():
         if direction.cookingtime:
             steps_time.append(direction.cookingtime)
 
-
+    # analyze ingredients in each step for toAltMethods
     stepIngredients = []
     igd_for_dir = set([ing.name for ing in prepIngredients for word in ing.name.split(' ') if word in directions[0]])
     stepIngredients.append(igd_for_dir)
@@ -379,17 +391,8 @@ def main():
     elif transformation == "chinese":
         prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, commonSpices, directions)
 
-    # Prepped ingredients
-    for ingredient in prepIngredients:
-        print '\n'
-        print 'name: ' + ingredient.name
-        print 'quantity: ' + str(ingredient.quantity)
-        print 'measurement: ' + ingredient.measurement if ingredient.quantity <= 1 or ingredient.measurement is 'none' \
-            else 'measurement: ' + pluralize(ingredient.measurement)
-        print 'descriptor: ' + ingredient.descriptor
-        print 'preparation: ' + ingredient.preparation
 
-
+    #Steps: analyze each direction
     steps = []
     all_altermethod = []
     for i in range(len(directions)):
@@ -407,33 +410,44 @@ def main():
                      ', '.join(steps_time[i]) + ' | ' + 'Details: ' + directions[i])
 
 
+    # Output: transformed ingredients
+    for ingredient in prepIngredients:
+        print '\n'
+        print 'name: ' + ingredient.name
+        print 'quantity: ' + str(ingredient.quantity)
+        print 'measurement: ' + ingredient.measurement if ingredient.quantity <= 1 or ingredient.measurement is 'none' \
+            else 'measurement: ' + pluralize(ingredient.measurement)
+        print 'descriptor: ' + ingredient.descriptor
+        print 'preparation: ' + ingredient.preparation
 
+
+    # Output: tools
     used_tools = [item for sublist in used_tools for item in sublist if not item is 'none']
     print '\nTools:\n', ', '.join(set(used_tools)) if len(used_tools) > 0 else 'none'
 
+    # Output: methods
     print '\nMethods:'
-    print '\tPrimary cooking methods:', ', '.join(set(primary_cookingmethods))
+    print '\tPrimary cooking methods:', ', '.join(set(primary_cookingmethods)) if len(primary_cookingmethods) > 0 else 'none'
     if transformation == "altmethod":
         if all_altermethod:
             print "\tAlternate Cooking Methods: " + ', '.join(set(all_altermethod))
         else:
             print "\tAlternate Cooking Methods: No alternate cooking method is available for this recipe."
 
-    #if len(altList) != 0:
-        #print '\tAlternative cooking methods:', ', '.join(set(altList))
-
     other_cookingmethods = [item for sublist in other_cookingmethods for item in sublist if not item is 'none']
     print '\tOther cooking methods:', ', '.join(set(other_cookingmethods)) if len(other_cookingmethods) > 0 else 'none'
 
+
+    # Output: steps
     print '\nSteps:'
     for s in steps:
         print '\n'.join(s.split(' | '))
         print '\n'
 
 
-
+    # Calculate running time
     end_time = time.time()
-    print(end_time - start_time)
+    print 'Running time: ' + str(end_time - start_time)
 
 
 
