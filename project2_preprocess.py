@@ -105,29 +105,25 @@ class Scraper:
         self.meats = meats
         return meats
 
-
-    # Helper function for healthy scrape
-    def not_strong(tag):
-        return tag.soup.td #and not tag.soup.has_attr("strong")
-    # return (tagged_td and not tag.soup.has_attr('strong'))
-
     # Scrape healthy substitutions
     def scrape_healthy(self):
-        unhealthyIngs = []
+        Ings = []
         for node in self.soup.find_all("td"):
-            unhealthyIngs.append(node.text)
-        #unhealthyIngs = unhealthyIngs[2 :]
-        #unhealthyIngs.pop(0)
-        ingDict = {}
-        for i in range(0, len(unhealthyIngs), 2):
-            ingDict[unhealthyIngs[i]] = unhealthyIngs[i + 1]
-
-        #need to get rid of <td> and </td> tags
-        fullHTML = []
-        print "healthy scrape gives"
-        print(ingDict)
-
-        return ingDict
+            Ings.append(node.text)
+        Ings = Ings[2:] #first two elements are nonsense
+        unhealthyList = []
+        #healthyList = []
+        units = self.scrape_unit()
+        count = 0
+        for i in range(0, len(Ings), 2):
+            #tempIng = Ingredients("temp measurement", units)
+            unhealthyList.append(Ings[i]) #a list of strings
+            count += 1
+            #tempIng.name = Ings[i+1]
+            #healthyList[i] = tempIng
+        print(unhealthyList)
+        #print (healthyList)
+        return unhealthyList #healthyList
 
     # Scrape seafood
     def scrape_seafood(self):
@@ -187,11 +183,6 @@ class Scraper:
     #     return ingredients
 
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> origin/master
 class Ingredients:
     def __init__(self, oneIngred, units,*kargs):
 

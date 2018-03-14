@@ -10,20 +10,30 @@ import time
 from pattern.text.en import pluralize
 import ingredients as ingred
 
+checkedIng = []
 
 #Update directions when any ingredient changes. Replace original ingredient to new ingredient
 def updateDirections_ingredients(directions,org_ingredient,new_ingredient):
     if any(org_ingredient in dir for dir in directions):
+        # checks for edge case where the same ingredient is separately listed twice
+        if (new_ingredient in checkedIng):
+            return directions
         directions = [dir.replace(org_ingredient, new_ingredient) for dir in directions]
+        checkedIng.append(new_ingredient)
     if org_ingredient[-1:] is "s":
-        if any(org_ingredient[:-1] in dir for dir in directions):
+        if any(org_ingredient[:-1] in dir and not any(org_ingredient) for dir in directions):
             directions = [dir.replace(org_ingredient[:-1], new_ingredient) for dir in directions]
+
+
     #edge case when the ingredient name changes and only part of the name appears in the directions
-    original = org_ingredient.split()
-    for name in original:
-        for i in xrange(len(directions)):
-            if name in directions[i]:
-                directions[i] = directions[i].replace(name, new_ingredient)
+    # original = org_ingredient.split()
+    # for name in original:
+    #     for i in xrange(len(directions)):
+    #         if name in directions[i]:
+    #             directions[i] = directions[i].replace(name, new_ingredient)
+
+
+
     return directions
 
 
@@ -86,9 +96,32 @@ def toVegan(ingredientList, meatList, meatSubs, veganSubs,directions):
         directions[j] = directions[j].replace("crack", "add")
     return veganList,directions
 
-def toHealthy(ingrediantList, unhealthyList):
+def toHealthy(ingredientList, unhealthyList, healthySubs, directions):
     healthyList = []
-    #for ingredient in ingrediantList:
+
+    for ingredient in ingredientList:
+        name = ingredient.name.split()
+        for word in name:
+            i = 0
+            for ing in unhealthyList:
+                if word in ing:
+            #if word in unhealthyDict:
+                    tempquantity = ingredient.quantity
+                    directions = updateDirections_ingredients(directions, ingredient.name, healthySubs[i].name)
+                    ingredient = healthySubs[i]
+                    ingredient.quantity = tempquantity
+
+                    break
+                i += 1
+
+                #break
+        healthyList.append(ingredient)
+    # for meat in meatList:
+    # for j in xrange(len(directions)):
+    #     directions[j] = directions[j].replace("meat", "tofu")
+    #     directions[j] = directions[j].replace("bone", "middle")
+    return healthyList, directions
+
 
 
 def toEasy(ingredientList, commonSpices):
@@ -203,12 +236,21 @@ def main():
     veganSubs = {"milk": ingred.almondmilk, "cream": ingred.almondmilk, "yogurt": ingred.coconutyogurt, "egg": ingred.silktofu, "butter": ingred.soymarg,
                  "honey":  ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
 
+    # Healthy Substitutions
+    healthySubs = [ingred.turkeybacon, ingred.wholegrainbread, ingred.rolledoats, ingred.fatfreebutterspread,
+                   ingred.halfandhalf, ingred.fatfreecreamcheese, ingred.eggwhites, ingred.wholewheatflour,
+                   ingred.leanbeef, ingred.arugula, ingred.reducedfatmayo, ingred.evaporatedskim, ingred.fatfreemilk, ingred.brownrice, ingred.fatfreedressing,
+                   ingred.fatfreesourcream, ingred.cookingspray]
 
+    #healthySubsDict = {"bacon": ingred.turkeybacon, "bread": ingred.wholegrainbread, "bread crumbs": ingred.rolledoats, "butter": ingred.fatfreebutterspread}
+
+    unhealthyList = ['bacon', 'bread', 'bread crumbs', 'butter', 'cream', 'cream cheese', 'eggs', 'flour' 'ground beef',
+                   'lettuce', 'mayonnaise', 'evaporated milk', 'milk', 'rice', 'dressing', 'sour cream']
 
     #scrape unhealthy ingredients
     unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
     unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
-    unhealthyDict = unhealthyList_sp.scrape_healthy()
+    #unhealthyList = unhealthyList_sp.scrape_healthy()
 
 
     #Easy change
@@ -325,6 +367,8 @@ def main():
         prepIngredients,directions = toVegan(prepIngredients, meatList, meatSubs, veganSubs,directions)
     elif transformation == "easy":
         prepIngredients = toEasy(prepIngredients, commonSpices)
+    elif transformation == "healthy":
+        prepIngredients,directions = toHealthy(prepIngredients, unhealthyList, healthySubs, directions)
     elif transformation == "altmethod":
         count1 = 0
         for pm in primary_cookingmethods_list:
