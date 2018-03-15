@@ -160,6 +160,39 @@ def toHealthy(ingredientList, healthySubsDict, directions):
         healthyList.append(ingredient)
     return healthyList, directions
 
+def toUnhealthy(ingredientList, healthySubsDict, unhealthySubsDict, directions, seafoodList):
+    unhealthyList = []
+    unhealthyRepl = {y: x for x, y in healthySubsDict.iteritems()}
+    for ingredient in ingredientList:
+        name = ingredient.name.split()
+        # for word in name:
+        for ing in unhealthyRepl.keys():
+            #ingName = ing.name.split()
+            #for part in ingName:
+            if ing.name in ingredient.name:
+                if ing.name == "sugar":
+                    ingredient.quantity = ingredient.quantity * 2 #double the amount of sugar for any type
+                directions = updateDirections_ingredients(directions, ingredient.name, unhealthyRepl[ing])
+                ingredient.name = unhealthyRepl[ing]
+                ingredient.descriptor = "none" #clear previous descriptors
+                if unhealthyRepl[ing] == "flour":
+                    ingredient.descriptor = "all-purpose"
+                break
+        for word in name:
+            if word in seafoodList:
+                directions = updateDirections_ingredients(directions, ingredient.name, unhealthySubsDict["fish"].name)
+                ingredient.name = unhealthySubsDict["fish"].name
+        for ing in unhealthySubsDict.keys():
+            if "whole turkey" in ingredient.name:
+                break #don't change anything if it is a whole turkey
+            if ing in ingredient.name:
+                directions = updateDirections_ingredients(directions, ingredient.name, unhealthySubsDict[ing].name)
+                ingredient.name = unhealthySubsDict[ing].name
+                ingredient.descriptor = unhealthySubsDict[ing].descriptor
+
+        unhealthyList.append(ingredient)
+    return unhealthyList, directions
+
 
 # Transformation: DIY to easy (OPTIONAL)
 def toEasy(ingredientList, commonSpices):
@@ -250,9 +283,9 @@ def main():
     start_time = time.time()
 
     #Ask for a user input
-    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, nonvegetarian, vegan, nonvegan, healthy, altmethod, easy, chinese, italian: "))
+    transformation = str(raw_input("What type of transformation do you want to do to the recipe?\n Your options are vegetarian, nonvegetarian, vegan, nonvegan, healthy, unhealthy, altmethod, easy, chinese, italian: "))
 
-    options = ['vegetarian', 'nonvegetarian', 'vegan', 'nonvegan', 'healthy', 'altmethod', 'easy', 'chinese', 'italian']
+    options = ['vegetarian', 'nonvegetarian', 'vegan', 'nonvegan', 'healthy', 'unhealthy', 'altmethod', 'easy', 'chinese', 'italian']
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
@@ -297,6 +330,8 @@ def main():
     seafood_page ="https://en.wikipedia.org/wiki/List_of_types_of_seafood"
     seafoodlist_sp = prep.Scraper(seafood_page, mod)
     seafoodList = seafoodlist_sp.scrape_seafood()
+    seafoodList.append('shrimp')
+    seafoodList.append('lobster')
     meatList.extend(seafoodList)
 
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms,ingred.jackfruit, ingred.lentils]
@@ -306,25 +341,12 @@ def main():
                  "honey": ingred.agave, "cheese": ingred.nutyeast, "gelatin": ingred.agar}
 
     # Healthy Substitutions
-    healthySubs = [ingred.turkeybacon, ingred.wholegrainbread, ingred.rolledoats, ingred.fatfreebutterspread,
-                   ingred.halfandhalf, ingred.fatfreecreamcheese, ingred.eggwhites, ingred.wholewheatflour,
-                   ingred.leanbeef, ingred.arugula, ingred.reducedfatmayo, ingred.evaporatedskim, ingred.fatfreemilk, ingred.brownrice, ingred.fatfreedressing,
-                   ingred.fatfreesourcream, ingred.cookingspray]
-
     healthySubsDict = {"sugar": ingred.sugar, "bacon": ingred.turkeybacon, "bread": ingred.wholegrainbread, "bread crumbs": ingred.rolledoats, "butter": ingred.fatfreebutterspread, "cream": ingred.halfandhalf,
                        "cream cheese": ingred.fatfreecreamcheese, "egg": ingred.eggwhites, "flour": ingred.wholewheatflour, "beef": ingred.leanbeef, "lettuce": ingred.arugula,
                        "mayonnaise": ingred.reducedfatmayo, "evaporated milk": ingred.evaporatedskim, "milk": ingred.fatfreemilk, "rice": ingred.brownrice, "dressing": ingred.fatfreedressing,
                        "sour cream": ingred.fatfreesourcream, "chocolate chips": ingred.unsweetenedchips}
 
-
-
-    #unhealthyList = ['bacon', 'bread', 'bread crumbs', 'butter', 'cream', 'cream cheese', 'eggs', 'flour' 'ground beef',
-                   #'lettuce', 'mayonnaise', 'evaporated milk', 'milk', 'rice', 'dressing', 'sour cream']
-
-    #scrape unhealthy ingredients
-    #unhealthy_page = "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/in-depth/healthy-recipes/art-20047195"
-    #unhealthyList_sp = prep.Scraper(unhealthy_page, mod)
-    #unhealthyList = unhealthyList_sp.scrape_healthy()
+    unhealthySubsDict = {"turkey": ingred.beef, "chicken": ingred.breadedchicken, "fish": ingred.beef}
 
 
     #Alt Methods
@@ -378,7 +400,7 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/262723/homemade-chocolate-eclairs/?internalSource=staff%20pick&referringContentType=home%20page&clickId=cardslot%209'
 
     #qpage = 'https://www.allrecipes.com/recipe/228796/slow-cooker-barbequed-beef-ribs/?internalSource=popular&referringContentType=home%20page&clickId=cardslot%205'
-    qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
+    #qpage = 'http://allrecipes.com/recipe/244195/italian-portuguese-meat-loaf-fusion/?internalSource=rotd&referringContentType=home%20page&clickId=cardslot%201'
 
     #test bone-in chicken thighs
     #qpage = 'https://www.allrecipes.com/recipe/259101/crispy-panko-chicken-thighs/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%203'
@@ -391,14 +413,17 @@ def main():
     #qpage = 'https://www.allrecipes.com/recipe/73634/colleens-slow-cooker-jambalaya/?internalSource=previously%20viewed&referringContentType=home%20page&clickId=cardslot%2014'
     #qpage = 'https://www.allrecipes.com/recipe/90209/'
     #qpage = 'https://www.allrecipes.com/recipe/245362/chef-johns-shakshuka/'
-    #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
 
+    #qpage = 'https://www.allrecipes.com/recipe/11731/shrimp-fra-diavolo/?internalSource=staff%20pick&referringId=95&referringContentType=recipe%20hub'
+    #qpage = 'https://www.allrecipes.com/recipe/13525/rosemary-roasted-turkey/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%205'
+    qpage = 'https://www.allrecipes.com/recipe/166583/spicy-chipotle-turkey-burgers/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%2013'
     #qpage = "https://www.allrecipes.com/recipe/241083/yellow-squash-and-tofu-stir-fry/?internalSource=streams&referringId=15165&referringContentType=recipe%20hub&clickId=st_recipes_mades"
 
     #qpage = 'https://www.allrecipes.com/recipe/7565/too-much-chocolate-cake/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%202'
 
     #qpage = 'https://www.allrecipes.com/recipe/14525/beer-steak/?internalSource=recipe%20hub&referringContentType=search%20results&clickId=cardslot%2044'
 
+    #qpage = 'https://www.allrecipes.com/recipe/139881/fragrant-and-healthy-carrot-cake/?internalSource=hub%20recipe&referringContentType=search%20results&clickId=cardslot%201'
 
     #scrape recipe
     recp = prep.Scraper(qpage, mod)
@@ -456,6 +481,8 @@ def main():
         prepIngredients = toEasy(prepIngredients, commonSpices)
     elif transformation == "healthy":
         prepIngredients,directions = toHealthy(prepIngredients, healthySubsDict, directions)
+    elif transformation == "unhealthy":
+        prepIngredients, directions = toUnhealthy(prepIngredients, healthySubsDict,unhealthySubsDict, directions, seafoodList)
     elif transformation == "altmethod":
         count1 = 0
         for pm in primary_cookingmethods_list:

@@ -73,13 +73,12 @@ balsamicvinegar = prep.Ingredients('2 tablespoons balsamic vinegar', units)
 turkeybacon = prep.Ingredients('1 piece turkey bacon', units)
 wholegrainbread = prep.Ingredients('2 slices of bread', units)
 rolledoats = prep.Ingredients('1 cup rolled oats', units)
-
 fatfreebutterspread = prep.Ingredients('3 tablespoon fat-free butter spread', units)
 cookingspray = prep.Ingredients('1 tablespoon', units)
 halfandhalf = prep.Ingredients('3 tablespoon fat-free half and half', units)
 fatfreecreamcheese = prep.Ingredients('1 cup fat-free cream cheese', units)
 eggwhites = prep.Ingredients('2 egg whites', units)
-wholewheatflour = prep.Ingredients('3 cups whole-wheat flour', units)
+wholewheatflour = prep.Ingredients('3 cups whole wheat flour', units)  #removed -
 leanbeef = prep.Ingredients('1 pound lean ground beef', units)
 arugula = prep.Ingredients('2 cups arugula', units)
 reducedfatmayo = prep.Ingredients('1 cup reduced-fat mayonnaise', units)
@@ -91,10 +90,15 @@ fatfreesourcream = prep.Ingredients('1 cup fat-free sour cream', units)
 sugar = prep.Ingredients('2 cups sugar', units)
 unsweetenedchips = prep.Ingredients('2 cups unsweetened chocolate chips', units)
 
-#rolledoats.name = "rolled oats"
+
 halfandhalf.name = "half and half"
 unsweetenedchips.name = "chocolate chips"
 unsweetenedchips.descriptor = "unsweetened"
 rolledoats.descriptor = "rolled"
-#wholewheatflour.name = "whole wheat flour"
-#wholegrainbread.name = "whole grain bread"
+
+
+#unhealthy replacements
+pork = prep.Ingredients('1 pound pork', units)
+cookedbeef = prep.Ingredients('1 pound of cooked ground beef', units)
+breadedchicken = prep.Ingredients('1 pound of breaded chicken', units)
+beef = prep.Ingredients('1 pound of beef', units)

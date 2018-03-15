@@ -107,26 +107,6 @@ class Scraper:
         self.meats = meats
         return meats
 
-    # Scrape healthy substitutions
-    def scrape_healthy(self):
-        Ings = []
-        for node in self.soup.find_all("td"):
-            Ings.append(node.text)
-        Ings = Ings[2:] #first two elements are nonsense
-        unhealthyList = []
-        #healthyList = []
-        units = self.scrape_unit()
-        count = 0
-        for i in range(0, len(Ings), 2):
-            #tempIng = Ingredients("temp measurement", units)
-            unhealthyList.append(Ings[i]) #a list of strings
-            count += 1
-            #tempIng.name = Ings[i+1]
-            #healthyList[i] = tempIng
-        print(unhealthyList)
-        #print (healthyList)
-        return unhealthyList #healthyList
-
     # Scrape seafood
     def scrape_seafood(self):
         seafood = []
