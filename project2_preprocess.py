@@ -170,17 +170,18 @@ class Ingredients:
 
         # extract parentheses and elements in it
         # for example: "1 (6 ounce) can": (6 ounce) will be extracted
-        words_parenth = re.search(r'\(\d.*\w\)', oneIngred)
+        words_parenth = re.search(r'\([\d*\/\d+|\d+|.| ]+[\w| ]+\)', oneIngred)
         words_parenth = words_parenth.group() if words_parenth else ''
 
         # remove parentheses in original string
-        oneIngred = re.sub(r'\(.*\)', '', oneIngred)
+        oneIngred = oneIngred.replace(words_parenth, '')
 
         # determine quantity
         # find the first number in a string, and convert str to float
         quantity_str = re.search('[\d*\/\d+|\d+| ]+|$', oneIngred).group()
         self.quantity = float("{0:.2f}".format(float(sum(Fraction(d) for d in quantity_str.split())))) \
             if quantity_str and not quantity_str is ' ' else 'none'
+
 
         # determine measurement, and update quantity if necessary
         if words_parenth:
@@ -194,6 +195,7 @@ class Ingredients:
             quantity_f = float("{0:.2f}".format(float(sum(Fraction(d) for d in quantity_parenth.group().split())))) \
                 if quantity_parenth and not quantity_parenth is ' ' else 'none'
             self.quantity = self.quantity * quantity_f if quantity_f != 'none' else self.quantity
+
 
             next_word = oneIngred[oneIngred.find(quantity_str) + len(quantity_str):].split()[0]
             oneIngred = oneIngred.replace(next_word, '') if singularize(next_word) in units else oneIngred
