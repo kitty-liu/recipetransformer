@@ -578,11 +578,11 @@ def main():
 
     
     recipe_title = recp.scrape_title()
-    print recipe_title
 
     # HTML Output: transformed ingredients
     f = open("results.html", "w")
-    f.write("<html><body><h2>Ingredients:</h2><br/>")
+    f.write("<html><body><h1>" + recipe_title + "</h1><br/>")
+    f.write("<h2>Ingredients:</h2><br/>")
     for ingredient in prepIngredients:
         if str(ingredient.quantity) != "none":
             f.write(str(ingredient.quantity) + " ")
