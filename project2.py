@@ -7,6 +7,7 @@
 
 import project2_preprocess as prep
 import time
+import copy
 from pattern.text.en import pluralize
 import ingredients as ingred
 
@@ -162,22 +163,44 @@ def toHealthy(ingredientList, healthySubsDict, directions):
 
 
 # Transformation: DIY to easy (OPTIONAL)
-def toEasy(ingredientList, commonSpices):
+def toEasy(ingredientList, commonSpices, typicalSpices, directions):
     count = 0
-    indexes = []
+    subcount = 0
+    replacements = []
+    spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
+    ingrls = []
+    ingnames = []
+    for ings in ingredientList:
+        ingnames.append(ings.name)
+    maxed = False
     for ingredient in ingredientList:
         common = False
         for spice in commonSpices:
             if spice in ingredient.name:
                 common = True
-        if not common and (ingredient.measurement == "teaspoon" or ingredient.measurement == "tablespoon"):
-            indexes.append(count)
+        if not common and ingredient.measurement in spiceSizes:
+            replaced = False
+            while not replaced and not maxed:
+                if subcount < len(typicalSpices):
+                    if typicalSpices[subcount].name not in ingnames:
+                        replacements.append([ingredient,typicalSpices[subcount]])
+                        replaced = True
+                else:
+                    maxed = True
+                subcount += 1
+            if not replaced:
+                olding = copy.deepcopy(ingredientList[count])
+                olding.name = olding.name + "&REMOVED&"
+                directions = updateDirections_ingredients(directions, ingredient.name, olding.name)
+                ingredient = olding
+        ingrls.append(ingredient)
         count += 1
-    adj = 0
-    for index in indexes:
-        ingredientList.pop(index + adj)
-        adj -= 1
-    return ingredientList
+    for r in replacements:
+        directions = updateDirections_ingredients(directions, r[0].name, r[1].name)
+        tempquantity = r[0].quantity
+        r[0] = r[1]
+        r[0].quantity = tempquantity
+    return ingredientList,directions
 
 
 # Transformation: toAltMethod
@@ -194,6 +217,7 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("meat",pm)
                     if res != -1:
+                        #directions = updateDirections_methods(directions,pm,' or '.join(set(res)))
                         altlt = res
                         return altlt,directions,pm
     # Meat has priority since it is more important if meat is cooked properly
@@ -203,20 +227,27 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
                 for alt in altMethods:
                     res = alt.getAlts("veg",pm)
                     if res != -1:
+                        #directions = updateDirections_methods(directions, pm, ' or '.join(set(res)))
                         altlt = res
                         return altlt, directions,pm
 
     altlt.append("")
     return altlt,directions,''
 
-
 # Transformation: toChinese (Style of cuisine)
 def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
     chList = []
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
     i = 0
+    z = 0
     for ingredient in ingredientList:
-        if ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+        if ingredient.name in commonSauces:
+            directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[1][z].name)
+            tempquantity = ingredient.quantity
+            ingredient = chineseIngredients[1][z]
+            ingredient.quantity = tempquantity
+            z +=1
+        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
             directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[0][i].name)
             tempquantity = ingredient.quantity
             ingredient = chineseIngredients[0][i]
@@ -231,18 +262,33 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
 
 
 # Transformation: toItalian (Style of cuisine)
-def toItalian(ingredientList, italianIngredients, commonSpices, directions):
+def toItalian(ingredientList, italianIngredients, commonSpices, commonSauces, commonOils, directions):
     itList = []
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
     i = 0
+    j = 0
+    oilReplaced = False
     for ingredient in ingredientList:
-        if ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+        if ingredient.name in commonSauces:
+            directions = updateDirections_ingredients(directions, ingredient.name, italianIngredients[1][j].name)
+            tempquantity = ingredient.quantity
+            ingredient = italianIngredients[1][j]
+            ingredient.quantity = tempquantity
+            j += 1
+        elif ingredient.name in commonOils and not oilReplaced:
+            olding = copy.deepcopy(ingredient)
+            olding.name = italianIngredients[2][0].name
+            directions = updateDirections_ingredients(directions, ingredient.name, olding.name)
+            ingredient = olding
+            oilReplaced = True
+        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
             directions = updateDirections_ingredients(directions, ingredient.name, italianIngredients[0][i].name)
             tempquantity = ingredient.quantity
             ingredient = italianIngredients[0][i]
             ingredient.quantity = tempquantity
             i += 1
         itList.append(ingredient)
+
     return itList,directions
 
 #Main function
@@ -356,11 +402,12 @@ def main():
     # CUISINE TRANSFORMATION LISTS
     commonSpices = ["salt", "pepper", "garlic powder", "onion powder", "water", "butter", "olive oil", "oil"]
 
-
+    typicalSpices = [ingred.salt, ingred.pepper, ingred.garlicpowder, ingred.onionpowder]
+    
     #Chinese Ingredients
     chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.chinesecinnamon,
                      ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder, ingred.peppercorn]
-    chineseSauces = [ingred.ricevinegar, ingred.soysauce, ingred.sesameoil, ingred.chilipaste]
+    chineseSauces = [ingred.fishsauce, ingred.soysauce, ingred.oystersauce, ingred.chilipaste]
     chineseVegetables = {"bell pepper": ingred.whiteradish, "asparagus": ingred.bambooshoots, "peas": ingred.beanspouts,
                          "lettuce": ingred.bokchoy, "brussel sprouts": ingred.chives, "kale": ingred.chinesecabbage}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
@@ -368,9 +415,11 @@ def main():
     #Italian Ingredients
     italianSpices = [ingred.oregano, ingred.thyme, ingred.rosemary, ingred.sage, ingred.basil,
                      ingred.marjoram]
-    italianSauces = [ingred.tomatosauce, ingred.alfredosauce, ingred.pestosauce, ingred.balsamicvinegar]
+    italianSauces = [ingred.tomatosauce, ingred.alfredosauce, ingred.pestosauce]
 
-    italianIngredients = [italianSpices, italianSauces]
+    italianOils = [ingred.oliveoil]
+
+    italianIngredients = [italianSpices, italianSauces, italianOils]
 
 
     #test pages:
@@ -453,20 +502,20 @@ def main():
     elif transformation == "nonvegan":
         prepIngredients,directions = toNonVegan(prepIngredients, commonMeatList, meatSubs, veganSubs, directions)
     elif transformation == "easy":
-        prepIngredients = toEasy(prepIngredients, commonSpices)
+        prepIngredients,directions = toEasy(prepIngredients, commonSpices, typicalSpices, directions)
     elif transformation == "healthy":
         prepIngredients,directions = toHealthy(prepIngredients, healthySubsDict, directions)
     elif transformation == "altmethod":
         count1 = 0
         for pm in primary_cookingmethods_list:
-            altmethods_list, directions,org_method = toAltMethod(stepIngredients[count1], vegetableList, meatList, altMethods, pm[0].encode('utf-8'),directions)
+            altmethods_list, directions,org_method = toAltMethod(stepIngredients[count1], vegetableList, meatList, altMethods, pm, directions)
             altList.append(altmethods_list)
             pm_list.append(org_method)
             count1 += 1
     elif transformation == "chinese":
-        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, commonSpices, directions)
+        prepIngredients,directions = toChinese(prepIngredients, chineseIngredients, commonSpices, commonSauces, directions)
     elif transformation == "italian":
-        prepIngredients,directions = toItalian(prepIngredients, italianIngredients, commonSpices, directions)
+        prepIngredients,directions = toItalian(prepIngredients, italianIngredients, commonSpices, commonSauces, commonOils, directions)
 
     #Steps: analyze each direction
     steps = []
