@@ -206,7 +206,7 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
         return altlt, directions, ''
     for ingredient in ingredientList:
         for meat in meatList:
-            if meat in ingredient:
+            if meat in ingredient and "broth" not in ingredient:
                 for alt in altMethods:
                     res = alt.getAlts("meat", pm)
                     if res != -1:
