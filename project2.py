@@ -210,7 +210,11 @@ def toEasy(ingredientList, commonSpices, typicalSpices, directions):
             while not replaced and not maxed:
                 if subcount < len(typicalSpices):
                     if typicalSpices[subcount].name not in ingnames:
-                        replacements.append([ingredient, typicalSpices[subcount]])
+                        directions = updateDirections_ingredients(directions, ingredient.name,
+                                                                  typicalSpices[subcount].name)
+                        tempquantity = ingredient.quantity
+                        ingredient = typicalSpices[subcount]
+                        ingredient.quantity = tempquantity
                         replaced = True
                 else:
                     maxed = True
@@ -222,12 +226,7 @@ def toEasy(ingredientList, commonSpices, typicalSpices, directions):
                 ingredient = olding
         ingrls.append(ingredient)
         count += 1
-    for r in replacements:
-        directions = updateDirections_ingredients(directions, r[0].name, r[1].name)
-        tempquantity = r[0].quantity
-        r[0] = r[1]
-        r[0].quantity = tempquantity
-    return ingredientList, directions
+    return ingrls, directions
 
 
 # Transformation: toAltMethod
