@@ -8,10 +8,9 @@
 import project2_preprocess as prep
 import time
 import copy
-from pattern.text.en import pluralize
+from pattern.text.en import pluralize,singularize
 import ingredients as ingred
 import requests
-
 
 checkedIng = []
 
@@ -124,6 +123,7 @@ def toNonVegan(ingredientList, commonMeatList, meatSubs, veganSubs, directions):
         nonVeganList.append(ingredient)
     return nonVeganList, directions
 
+
 # Transformation: toHealthy
 def toHealthy(ingredientList, healthySubsDict, directions):
     healthyList = []
@@ -154,6 +154,7 @@ def toHealthy(ingredientList, healthySubsDict, directions):
         healthyList.append(ingredient)
     return healthyList, directions
 
+
 def toUnhealthy(ingredientList, healthySubsDict, unhealthySubsDict, directions, seafoodList):
     unhealthyList = []
     unhealthyRepl = {y: x for x, y in healthySubsDict.iteritems()}
@@ -161,14 +162,14 @@ def toUnhealthy(ingredientList, healthySubsDict, unhealthySubsDict, directions, 
         name = ingredient.name.split()
         # for word in name:
         for ing in unhealthyRepl.keys():
-            #ingName = ing.name.split()
-            #for part in ingName:
+            # ingName = ing.name.split()
+            # for part in ingName:
             if ing.name in ingredient.name:
                 if ing.name == "sugar":
-                    ingredient.quantity = ingredient.quantity * 2 #double the amount of sugar for any type
+                    ingredient.quantity = ingredient.quantity * 2  # double the amount of sugar for any type
                 directions = updateDirections_ingredients(directions, ingredient.name, unhealthyRepl[ing])
                 ingredient.name = unhealthyRepl[ing]
-                ingredient.descriptor = "none" #clear previous descriptors
+                ingredient.descriptor = "none"  # clear previous descriptors
                 if unhealthyRepl[ing] == "flour":
                     ingredient.descriptor = "all-purpose"
                 break
@@ -178,7 +179,7 @@ def toUnhealthy(ingredientList, healthySubsDict, unhealthySubsDict, directions, 
                 ingredient.name = unhealthySubsDict["fish"].name
         for ing in unhealthySubsDict.keys():
             if "whole turkey" in ingredient.name:
-                break #don't change anything if it is a whole turkey
+                break  # don't change anything if it is a whole turkey
             if ing in ingredient.name:
                 directions = updateDirections_ingredients(directions, ingredient.name, unhealthySubsDict[ing].name)
                 ingredient.name = unhealthySubsDict[ing].name
@@ -331,7 +332,8 @@ def main():
     transformation = str(raw_input(
         "What type of transformation do you want to do to the recipe?\n Your options are vegetarian, nonvegetarian, vegan, nonvegan, healthy, unhealthy, altmethod, easy, chinese, italian: "))
 
-    options = ['vegetarian', 'nonvegetarian', 'vegan', 'nonvegan', 'healthy', 'unhealthy', 'altmethod', 'easy', 'chinese', 'italian']
+    options = ['vegetarian', 'nonvegetarian', 'vegan', 'nonvegan', 'healthy', 'unhealthy', 'altmethod', 'easy',
+               'chinese', 'italian']
     if transformation in options:
         print 'Transforming to ' + transformation + '...\n'
     else:
@@ -368,13 +370,11 @@ def main():
     meatlist_sp = prep.Scraper(meat_page, mod)
     meatList = meatlist_sp.scrape_meats()
     meatList.extend(
-        ("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "ribs", "steak", "bone", "thigh", "thighs"))
+        ("pepperoni", "salami", "proscuitto", "sausage", "ham", "chorizo", "rib", "steak", "bone", "thigh"))
 
     seafood_page = "https://en.wikipedia.org/wiki/List_of_types_of_seafood"
     seafoodlist_sp = prep.Scraper(seafood_page, mod)
     seafoodList = seafoodlist_sp.scrape_seafood()
-    seafoodList.append('shrimp')
-    seafoodList.append('lobster')
     meatList.extend(seafoodList)
 
     meatSubs = [ingred.tofu, ingred.tempeh, ingred.texturedvegprote, ingred.mushrooms, ingred.jackfruit, ingred.lentils]
@@ -387,13 +387,13 @@ def main():
     # Healthy Substitutions
     unhealthySubsDict = {"turkey": ingred.beef, "chicken": ingred.breadedchicken, "fish": ingred.beef}
     healthySubsDict = {"sugar": ingred.sugar, "bacon": ingred.turkeybacon, "bread": ingred.wholegrainbread,
-                       "bread crumbs": ingred.rolledoats, "butter": ingred.fatfreebutterspread,
+                       "bread crumb": ingred.rolledoats, "butter": ingred.fatfreebutterspread,
                        "cream": ingred.halfandhalf,
                        "cream cheese": ingred.fatfreecreamcheese, "egg": ingred.eggwhites,
                        "flour": ingred.wholewheatflour, "beef": ingred.leanbeef, "lettuce": ingred.arugula,
                        "mayonnaise": ingred.reducedfatmayo, "evaporated milk": ingred.evaporatedskim,
                        "milk": ingred.fatfreemilk, "rice": ingred.brownrice, "dressing": ingred.fatfreedressing,
-                       "sour cream": ingred.fatfreesourcream, "chocolate chips": ingred.unsweetenedchips}
+                       "sour cream": ingred.fatfreesourcream, "chocolate chip": ingred.unsweetenedchips}
 
     # Alt Methods
     altList = []
@@ -434,9 +434,10 @@ def main():
     chineseSpices = [ingred.ginger, ingred.star_anise, ingred.five_spice, ingred.cilantro, ingred.chinesecinnamon,
                      ingred.cloves, ingred.fennelseed, ingred.corianderseed, ingred.chilipowder, ingred.peppercorn]
     chineseSauces = [ingred.fishsauce, ingred.soysauce, ingred.oystersauce, ingred.chilipaste]
-    chineseVegetables = {"bell pepper": ingred.whiteradish, "asparagus": ingred.bambooshoots, "peas": ingred.beanspouts,
-                         "lettuce": ingred.bokchoy, "brussel sprouts": ingred.chives, "kale": ingred.chinesecabbage}
+    chineseVegetables = {"bell pepper": ingred.whiteradish, "asparagu": ingred.bambooshoots, "pea": ingred.beanspouts,
+                         "lettuce": ingred.bokchoy, "brussel sprout": ingred.chives, "kale": ingred.chinesecabbage}
     chineseIngredients = [chineseSpices, chineseSauces, chineseVegetables]
+
 
     # Italian Ingredients
     italianSpices = [ingred.oregano, ingred.thyme, ingred.rosemary, ingred.sage, ingred.basil,
@@ -448,8 +449,7 @@ def main():
 
     italianIngredients = [italianSpices, italianSauces, italianOils]
 
-
-    #scrape recipe
+    # scrape recipe
     recp = prep.Scraper(qpage, mod)
     ingredients = recp.scrape_ingredients()
     directions = recp.scrape_directions()
@@ -503,9 +503,10 @@ def main():
     elif transformation == "easy":
         prepIngredients, directions = toEasy(prepIngredients, commonSpices, typicalSpices, directions)
     elif transformation == "healthy":
-        prepIngredients,directions = toHealthy(prepIngredients, healthySubsDict, directions)
+        prepIngredients, directions = toHealthy(prepIngredients, healthySubsDict, directions)
     elif transformation == "unhealthy":
-        prepIngredients, directions = toUnhealthy(prepIngredients, healthySubsDict,unhealthySubsDict, directions, seafoodList)
+        prepIngredients, directions = toUnhealthy(prepIngredients, healthySubsDict, unhealthySubsDict, directions,
+                                                  seafoodList)
 
     elif transformation == "altmethod":
         count1 = 0
@@ -580,7 +581,6 @@ def main():
     end_time = time.time()
     print 'Running time: ' + str(end_time - start_time)
 
-    
     # HTML Output: transformed ingredients
     f = open("results.html", "w")
     f.write("<html><body><h2>Ingredients:</h2><br/>")
@@ -596,8 +596,8 @@ def main():
         else:
             f.write(" " + pluralize(ingredient.measurement))
         f.write(" " + ingredient.name + "<br/>")
-        #f.write('descriptor: ' + ingredient.descriptor + "<br/>")
-        #f.write('preparation: ' + ingredient.preparation + "<br/><br/>")
+        # f.write('descriptor: ' + ingredient.descriptor + "<br/>")
+        # f.write('preparation: ' + ingredient.preparation + "<br/><br/>")
 
     # HTML Output: tools
     f.write('<h2>Tools:</h2><br/>')
@@ -623,7 +623,7 @@ def main():
     for s in steps:
         f.write('<br/>'.join(s.split(' | ')))
         f.write('<br/><br/>')
-    
+
 
 if __name__ == "__main__":
     main()
