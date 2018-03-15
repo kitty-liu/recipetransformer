@@ -232,8 +232,8 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, commonSauces, di
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
     i = 0
     z = 0
-    for ingredient in ingredientList and z < len(chineseIngredients[1]):
-        if ingredient.name in commonSauces:
+    for ingredient in ingredientList:
+        if ingredient.name in commonSauces and z < len(chineseIngredients[1]):
             directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[1][z].name)
             tempquantity = ingredient.quantity
             ingredient = chineseIngredients[1][z]
