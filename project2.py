@@ -553,6 +553,50 @@ def main():
     end_time = time.time()
     print 'Running time: ' + str(end_time - start_time)
 
+    
+    # HTML Output: transformed ingredients
+    f = open("results.html", "w")
+    f.write("<html><body><h2>Ingredients:</h2><br/>")
+    for ingredient in prepIngredients:
+        if str(ingredient.quantity) != "none":
+            f.write(str(ingredient.quantity) + " ")
+        else:
+            f.write("")
+        if ingredient.measurement is 'none':
+            f.write("")
+        elif ingredient.quantity <= 1:
+            f.write(" " + ingredient.measurement)
+        else:
+            f.write(" " + pluralize(ingredient.measurement))
+        f.write(" " + ingredient.name + "<br/>")
+        #f.write('descriptor: ' + ingredient.descriptor + "<br/>")
+        #f.write('preparation: ' + ingredient.preparation + "<br/><br/>")
+
+    # HTML Output: tools
+    f.write('<h2>Tools:</h2><br/>')
+    f.write(', '.join(set(used_tools)) if len(used_tools) > 0 else 'none')
+    f.write('<br/>')
+    # HTML Output: methods
+    f.write('<br/><h2>Methods:</h2><br/>')
+    f.write('Primary cooking methods: ')
+    f.write(', '.join(set(primary_cookingmethods)) if len(primary_cookingmethods) > 0 else 'none')
+    f.write("<br/>")
+    if transformation == "altmethod":
+        if all_altermethod:
+            f.write("Alternate Cooking Methods: " + ', '.join(set(all_altermethod)))
+            f.write("<br/>")
+        else:
+            f.write("Alternate Cooking Methods: No alternate cooking method is available for this recipe.")
+            f.write("<br/>")
+    f.write('Other cooking methods: ')
+    f.write(', '.join(set(other_cookingmethods)) if len(other_cookingmethods) > 0 else 'none')
+
+    # HTML Output: steps
+    f.write('<h2>Steps:</h2><br/>')
+    for s in steps:
+        f.write('<br/>'.join(s.split(' | ')))
+        f.write('<br/><br/>')
+    
 
 if __name__ == "__main__":
     main()
