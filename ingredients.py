@@ -40,8 +40,6 @@ chilipowder = prep.Ingredients('1/2 tablespoon chili powder', units)
 
 
 # Chinese Sauces
-sesameoil = prep.Ingredients('1 tablespoon sesame oil', units)
-ricevinegar = prep.Ingredients('2 tablespoon rice vinegar', units)
 soysauce = prep.Ingredients('2 tablespoon soy sauce', units)
 chilipaste = prep.Ingredients('1 tablespoon chili paste', units)
 fishsauce = prep.Ingredients('1 tablespoon fish sauce', units)
@@ -67,12 +65,15 @@ marjoram = prep.Ingredients('1 teaspoon dried marjoram', units)
 tomatosauce = prep.Ingredients('3 tablespoons tomato sauce', units)
 alfredosauce = prep.Ingredients('2 tablespoons alfredo sauce', units)
 pestosauce = prep.Ingredients('2 tablespoons pesto sauce', units)
-balsamicvinegar = prep.Ingredients('2 tablespoons balsamic vinegar', units)
 
 #Healthy replacements
 turkeybacon = prep.Ingredients('1 piece turkey bacon', units)
 wholegrainbread = prep.Ingredients('2 slices of bread', units)
 rolledoats = prep.Ingredients('1 cup rolled oats', units)
+
+# Italian Oil
+oliveoil = prep.Ingredients('1 tablespoon olive oil', units)
+
 
 fatfreebutterspread = prep.Ingredients('3 tablespoon fat-free butter spread', units)
 cookingspray = prep.Ingredients('1 tablespoon', units)
@@ -98,3 +99,10 @@ unsweetenedchips.descriptor = "unsweetened"
 rolledoats.descriptor = "rolled"
 #wholewheatflour.name = "whole wheat flour"
 #wholegrainbread.name = "whole grain bread"
+
+
+#Typical Spices
+salt = prep.Ingredients('1/2 teaspoon salt', units)
+pepper = prep.Ingredients('1/2 teaspoon pepper', units)
+garlicpowder = prep.Ingredients('1/2 teaspoon garlic powder', units)
+onionpowder = prep.Ingredients('1/2 teaspoon onion powder', units)
