@@ -107,12 +107,13 @@ class Scraper:
         self.meats = meats
         return meats
 
+
     # Scrape seafood
     def scrape_seafood(self):
         seafood = []
         fullHTML = self.soup.find_all('li')
         for x in range(11, 98):
-            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()))
+            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()).strip())
         return seafood
 
     # Scrape vegetables
@@ -147,22 +148,9 @@ class Scraper:
                 vegetables.pop(v + adjuster)
                 adjuster -= 1
         self.vegetables = vegetables
-        return vegetables
 
-    # # Scrape Chinese ingredients
-    # def scrape_chineseingredients(self):
-    #     ingredients = []
-    #     spices = []
-    #     sauces = []
-    #     vegetables = []
-    #     table = self.soup.find_all('td')
-    #     fullHTML = []
-    #     for t in table:
-    #         fullHTML = t.find_all("br")
-    #     for x in range(0, len(fullHTML)):
-    #         ingredients.append(fullHTML[x].text.strip().encode('utf-8').lower())
-    #     self.chinese = ingredients
-    #     return ingredients
+        vegetables = [v.strip() for v in vegetables]
+        return vegetables
 
 
 #Class of ingredients

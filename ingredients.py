@@ -40,8 +40,6 @@ chilipowder = prep.Ingredients('1/2 tablespoon chili powder', units)
 
 
 # Chinese Sauces
-sesameoil = prep.Ingredients('1 tablespoon sesame oil', units)
-ricevinegar = prep.Ingredients('2 tablespoon rice vinegar', units)
 soysauce = prep.Ingredients('2 tablespoon soy sauce', units)
 chilipaste = prep.Ingredients('1 tablespoon chili paste', units)
 fishsauce = prep.Ingredients('1 tablespoon fish sauce', units)
@@ -67,7 +65,9 @@ marjoram = prep.Ingredients('1 teaspoon dried marjoram', units)
 tomatosauce = prep.Ingredients('3 tablespoons tomato sauce', units)
 alfredosauce = prep.Ingredients('2 tablespoons alfredo sauce', units)
 pestosauce = prep.Ingredients('2 tablespoons pesto sauce', units)
-balsamicvinegar = prep.Ingredients('2 tablespoons balsamic vinegar', units)
+
+# Italian Oil
+oliveoil = prep.Ingredients('1 tablespoon olive oil', units)
 
 #Healthy replacements
 turkeybacon = prep.Ingredients('1 piece turkey bacon', units)
@@ -102,3 +102,11 @@ pork = prep.Ingredients('1 pound pork', units)
 cookedbeef = prep.Ingredients('1 pound of cooked ground beef', units)
 breadedchicken = prep.Ingredients('1 pound of breaded chicken', units)
 beef = prep.Ingredients('1 pound of beef', units)
+
+
+#Typical Spices
+salt = prep.Ingredients('1/2 teaspoon salt', units)
+pepper = prep.Ingredients('1/2 teaspoon pepper', units)
+garlicpowder = prep.Ingredients('1/2 teaspoon garlic powder', units)
+onionpowder = prep.Ingredients('1/2 teaspoon onion powder', units)
+
