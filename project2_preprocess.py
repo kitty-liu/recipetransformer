@@ -125,6 +125,8 @@ class Scraper:
             #healthyList[i] = tempIng
         print(unhealthyList)
         #print (healthyList)
+
+        unhealthyList = [un.strip().lower() for un in unhealthyList]
         return unhealthyList #healthyList
 
     # Scrape seafood
@@ -132,7 +134,7 @@ class Scraper:
         seafood = []
         fullHTML = self.soup.find_all('li')
         for x in range(11, 98):
-            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()))
+            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()).strip())
         return seafood
 
     # Scrape vegetables
@@ -167,6 +169,8 @@ class Scraper:
                 vegetables.pop(v + adjuster)
                 adjuster -= 1
         self.vegetables = vegetables
+
+        vegetables = [v.strip() for v in vegetables]
         return vegetables
 
 
