@@ -240,14 +240,14 @@ def toChinese(ingredientList, chineseIngredients, commonSpices, commonSauces, di
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
     i = 0
     z = 0
-    for ingredient in ingredientList:
+    for ingredient in ingredientList  and z < len(chineseIngredients[1]):
         if ingredient.name in commonSauces:
             directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[1][z].name)
             tempquantity = ingredient.quantity
             ingredient = chineseIngredients[1][z]
             ingredient.quantity = tempquantity
             z +=1
-        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes and i < len(chineseIngredients[0]):
             directions = updateDirections_ingredients(directions, ingredient.name, chineseIngredients[0][i].name)
             tempquantity = ingredient.quantity
             ingredient = chineseIngredients[0][i]
@@ -269,7 +269,7 @@ def toItalian(ingredientList, italianIngredients, commonSpices, commonSauces, co
     j = 0
     oilReplaced = False
     for ingredient in ingredientList:
-        if ingredient.name in commonSauces:
+        if ingredient.name in commonSauces and j < len(italianIngredients[1]):
             directions = updateDirections_ingredients(directions, ingredient.name, italianIngredients[1][j].name)
             tempquantity = ingredient.quantity
             ingredient = italianIngredients[1][j]
@@ -281,7 +281,7 @@ def toItalian(ingredientList, italianIngredients, commonSpices, commonSauces, co
             directions = updateDirections_ingredients(directions, ingredient.name, olding.name)
             ingredient = olding
             oilReplaced = True
-        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes:
+        elif ingredient.name not in commonSpices and ingredient.measurement in spiceSizes and i < len(italianIngredients[0]):
             directions = updateDirections_ingredients(directions, ingredient.name, italianIngredients[0][i].name)
             tempquantity = ingredient.quantity
             ingredient = italianIngredients[0][i]
