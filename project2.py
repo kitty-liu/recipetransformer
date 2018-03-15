@@ -162,8 +162,7 @@ def toUnhealthy(ingredientList, healthySubsDict, unhealthySubsDict, directions, 
         name = ingredient.name.split()
         # for word in name:
         for ing in unhealthyRepl.keys():
-            # ingName = ing.name.split()
-            # for part in ingName:
+
             if ing.name in ingredient.name:
                 if ing.name == "sugar":
                     ingredient.quantity = ingredient.quantity * 2  # double the amount of sugar for any type
