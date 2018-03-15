@@ -30,6 +30,15 @@ class Scraper:
             # if input is a file
             self.page = qpage
 
+    # Scrape recipe title
+    def scrape_title(self):
+        title = ''
+        fullHTML = self.soup.find('title')
+        title = fullHTML.text if fullHTML else 'None'
+        return title
+
+
+
     # Scrape all ingredients
     def scrape_ingredients(self):
         ingredients = []
