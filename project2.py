@@ -235,7 +235,7 @@ def toAltMethod(ingredientList, vegetableList, meatList, altMethods, pm, directi
     return altlt,directions,''
 
 # Transformation: toChinese (Style of cuisine)
-def toChinese(ingredientList, chineseIngredients, commonSpices, directions):
+def toChinese(ingredientList, chineseIngredients, commonSpices, commonSauces, directions):
     chList = []
     spiceSizes = ["pinch", "tablespoon", "tablespoons", "teaspoon", "teaspoons", "to taste", "dash", "drops"]
     i = 0
@@ -401,6 +401,10 @@ def main():
 
     # CUISINE TRANSFORMATION LISTS
     commonSpices = ["salt", "pepper", "garlic powder", "onion powder", "water", "butter", "olive oil", "oil"]
+    
+    commonSauces = ["barbecue", "bbq", "gravy", "buffalo", "tabasco", "sriracha", "mustard",
+                    "ketchup", "salsa"]
+    commonOils = ["canola oil", "vegtable oil", "coconut oil", "peanut oil", "lard", "cooking spray"]
 
     typicalSpices = [ingred.salt, ingred.pepper, ingred.garlicpowder, ingred.onionpowder]
     
