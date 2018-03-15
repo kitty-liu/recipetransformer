@@ -576,9 +576,9 @@ def main():
         print '\n'.join(s.split(' | '))
         print '\n'
 
-    # Calculate running time
-    end_time = time.time()
-    print 'Running time: ' + str(end_time - start_time)
+    
+    recipe_title = recp.scrape_title()
+    print recipe_title
 
     # HTML Output: transformed ingredients
     f = open("results.html", "w")
@@ -622,6 +622,10 @@ def main():
     for s in steps:
         f.write('<br/>'.join(s.split(' | ')))
         f.write('<br/><br/>')
+        
+    # Calculate running time
+    end_time = time.time()
+    print 'Running time: ' + str(end_time - start_time)
 
 
 if __name__ == "__main__":
