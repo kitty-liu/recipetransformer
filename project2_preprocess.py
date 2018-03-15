@@ -105,6 +105,7 @@ class Scraper:
         for x in range(0, len(fullHTML)):
             meats.append(fullHTML[x].text.strip().encode('utf-8').lower())
         self.meats = meats
+        meats = [singularize(m.strip()) for m in meats]
         return meats
 
 
@@ -113,7 +114,8 @@ class Scraper:
         seafood = []
         fullHTML = self.soup.find_all('li')
         for x in range(11, 98):
-            seafood.append(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()).strip())
+            seafood.append(singularize(re.sub('\(.*?\)','',fullHTML[x].text.strip().encode('utf-8').lower()).strip()))
+
         return seafood
 
     # Scrape vegetables
@@ -149,7 +151,7 @@ class Scraper:
                 adjuster -= 1
         self.vegetables = vegetables
 
-        vegetables = [v.strip() for v in vegetables]
+        vegetables = [singularize(v.strip()) for v in vegetables]
         return vegetables
 
 
@@ -281,12 +283,12 @@ class Ingredients:
                     namelist = [(w.string).encode('utf-8') for w in chunk.words if not w.type is 'CD'
                                 and not w.string in spe_jj and not w.string in self.preparation and not '-' in w.string]
                     name = name + ' '.join(namelist) + ' '
-        self.name = name.strip()
+        self.name = singularize(name.strip())
 
         if self.name is '':
             names = [word for word, pos in token_tag \
                      if (pos.startswith('NN')) and not word.encode('utf-8') in units]
-            self.name = ' '.join(map(str, names)) if names else 'none'
+            self.name = singularize(' '.join(map(str, names)) if names else 'none')
 
 
 # Class of directions
