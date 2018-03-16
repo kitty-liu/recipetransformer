@@ -1,0 +1,10 @@
+I built Scraper class, Ingredients class and Directions class.
+
+I wrote the parser for ingredients extracting name, quantity, measurement, descriptor, preparation and transformed_method,
+and the parser for directions extracting tools, primary cooking methods, other cooking methods, times and steps.
+
+I wrote scrape_title, scrape_ingredients, scrape_directions, scrape_unit, scrape_primarycookingmethods,
+scrape_cookingmethods and scrape_tools in Scraper class.
+
+I tested and debugged when we finalized our code.
+
