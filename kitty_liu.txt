@@ -1,1 +1,4 @@
-I wrote the toVegetarian, toVegan, toNonVegetarian, toNonVegan, toChinese, meat scraper, and seafood scraper methods (and the lists, dictionaries, function calls relevant to them). I created the indegredients.py file to separate out the ingredient instance declarations. 
+I wrote the toVegetarian, toVegan, toNonVegetarian, toNonVegan, toChinese, meat scraper, and seafood scraper methods 
+(and the lists, dictionaries, function calls relevant to them). 
+
+I created the indegredients.py file to separate out the ingredient instance declarations. 
