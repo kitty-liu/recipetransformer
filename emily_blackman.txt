@@ -1,0 +1,7 @@
+I wrote the toHealthy and toUnhealthy functions and the assorted dictionaries, lists, ingredients and function calls related to them.
+
+I wrote part of the updateDirections_ingredients function which puts the updated ingredients into the printed out directions.
+
+I wrote a scraping method for the healthy ingredients (but it is not in the final version of the code as it was uneccessary).
+
+I helped test and debug the finalalized version of the code.
