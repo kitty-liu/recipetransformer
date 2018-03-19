@@ -1,6 +1,6 @@
-I wrote the toEasy, toAltmethod, toItalian functions and their corresponding components in the Porject2.py and Ingredient.py files.
+I wrote the toEasy, toAltmethod, toItalian functions and their corresponding components in the Project2.py and Ingredient.py files.
 
-I wrote the scraping process for vegatables. 
+I wrote the scraping process for vegetables. 
 
 I wrote the html output system for the final, revised recipe.
 
