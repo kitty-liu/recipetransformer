@@ -1,0 +1,7 @@
+I wrote the toEasy, toAltmethod, toItalian functions and their corresponding components in the Porject2.py and Ingredient.py files.
+
+I wrote the scraping process for vegatables. 
+
+I wrote the html output system for the final, revised recipe.
+
+I, like everyone else in the group, helped debug the code.
